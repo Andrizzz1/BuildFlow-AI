@@ -14,19 +14,19 @@ export default function Login_form(){
         manager: {
             Dashboard_direct:'/Dashboard/owner',
             logo: HardHat,
-            name: 'Organization Owner',
+            name: 'Project manager/contractor',
             email_name: 'Manager Email',  
         },
         worker: {
             Dashboard_direct:'/Dashboard/owner',
             logo: Hammer,
-            name: 'Organization Owner',
+            name: 'Worker/subcontractor',
             email_name: 'Worker Email',  
         },
         client: {
             Dashboard_direct:'/Dashboard/owner',
             logo: Handshake,
-            name: 'Organization Owner',
+            name: 'Client',
             email_name: 'Client Email',  
         },
 
