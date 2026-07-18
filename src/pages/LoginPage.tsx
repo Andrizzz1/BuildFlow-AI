@@ -39,6 +39,7 @@ export default function Login_form(){
             logo={roles.owner.logo}
             name={roles.owner.name}
             email_name={roles.owner.email_name}
+            role="owner"
 
 
             />}
@@ -48,6 +49,7 @@ export default function Login_form(){
                 logo={roles.manager.logo}
                 name={roles.manager.name}
                 email_name={roles.manager.email_name}
+                role="manager"
 
                 />}
         {role === 'worker' && 
@@ -56,6 +58,7 @@ export default function Login_form(){
                 logo={roles.worker.logo}
                 name={roles.worker.name}
                 email_name={roles.worker.email_name}
+                role="worker"
 
                 />}
         {role === 'client' && 
@@ -64,7 +67,7 @@ export default function Login_form(){
                 logo={roles.client.logo}
                 name={roles.client.name}
                 email_name={roles.client.email_name}
-
+                role="client"
                 />}
     </section>
 }

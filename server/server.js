@@ -20,8 +20,8 @@ const db = new pg.Client({
 db.connect()
 
 app.post('/validation',async (req,res)=>{
-    const {email,password} = req.body
-    const user = await db.query("SELECT * FROM users WHERE email = $1",[email])
+    const {email,password,role} = req.body
+    const user = await db.query("SELECT * FROM users WHERE email = $1 AND role = $2",[email,role])
     console.log(user)
     try{
         if (!user.rows[0]) {

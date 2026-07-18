@@ -8,6 +8,7 @@ type LoginPageProps = {
   logo: LucideIcon;
   name: string;
   email_name: string;
+  role:string
 };
 
 export default function Loginlayout({
@@ -15,19 +16,21 @@ export default function Loginlayout({
   logo: Logo,
   name,
   email_name,
+  role
 }: LoginPageProps) {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userLogindetails, getLogindetails] = useState({
     email:'',
-    password:''
+    password:'',
+    role: role
   })
 
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
-
+    console.log(userLogindetails)
     try{
       const res = await fetch("http://localhost:3000/validation",{
         method:"POST",
@@ -84,7 +87,7 @@ export default function Loginlayout({
       {/* Content */}
       <div className="relative z-10 mx-auto grid min-h-[calc(100vh-88px)] max-w-6xl grid-cols-1 items-center gap-16 px-6 py-12 lg:grid-cols-2 lg:px-20">
         {/* Branding column */}
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col justify-center max-md:text-center  max-lg:items-center ">
           <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[#4682B4]/30 bg-[#4682B4]/5 px-3 py-1 text-[10px] font-semibold tracking-[0.25em] text-[#033363]">
             <span className="h-1.5 w-1.5 rounded-full bg-[#00BFFF]" />
             SECURE ACCESS

@@ -16,7 +16,7 @@ export default function PortalCard({logo:Logo, name,desc, link}:PortalCardProps)
     cursor-pointer 
     text-white 
     border-l-4 p-1 
-    w-full md:h-40 lg:w-md md:w-xs
+    w-full md:h-50 lg:h-40 lg:w-md md:w-xs 
     border-[#FF8C00] 
     rounded-sm
     max-sm:gap-1
