@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Mail, Lock, LogIn, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
-
+import { useLogin } from "../hooks/UseLogin";
 type LoginPageProps = {
   Dashboard_direct: string;
   logo: LucideIcon;
@@ -26,39 +26,23 @@ export default function Loginlayout({
     role: role
   })
 
-
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
-    console.log(userLogindetails)
     try{
-      const res = await fetch("http://localhost:3000/validation",{
-        method:"POST",
-        headers :{'Content-Type':'application/json'},
-        body:JSON.stringify(userLogindetails)
-      })
-
-    if(!res.ok){
-       throw new Error("Invalid email or password");
-    }
-
-    const data = await res.json();
-    console.log(data)
-    // e.g. save a token so future requests know you're logged in
-    localStorage.setItem("token", data.token);
-    setIsSubmitting(false)
-    navigate(Dashboard_direct);
-
+      const user  = await useLogin(userLogindetails)
+      if (user){
+        setIsSubmitting(false)
+        navigate(Dashboard_direct);
+      }
     }catch(err){
       console.log(err)
+      alert(err)
+    }finally{
       setIsSubmitting(false)
-      alert("wrong credentials")
     }
 
-
-
   }
-
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
         getLogindetails(prev=>({...prev,[e.target.name]: e.target.value}))
