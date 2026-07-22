@@ -1,5 +1,7 @@
 import StaggeredMenu from "@/components/StaggeredMenu";
 import logo from "../assets/logo.png";
+import CreateProjectModal from "@/components/CreateProjectModal";
+
 import {
   FolderOpenDot,
   FolderDot,
@@ -8,17 +10,21 @@ import {
   Plus,
 } from "lucide-react";
 
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 export default function Owner_Dashboard() {
   const menuItems = [
-    { label: "Projects", ariaLabel: "Go to home page", link: "/" },
-    { label: "Managers", ariaLabel: "Learn about us", link: "/about" },
-    { label: "Workers", ariaLabel: "View our services", link: "/services" },
-    { label: "Clients", ariaLabel: "Get in touch", link: "/contact" },
-    { label: "Messages", ariaLabel: "Get in touch", link: "/contact" },
+    { label: "Projects", ariaLabel: "Go to home page", link: "/Dashboard/Projects" },
+    { label: "Managers", ariaLabel: "Learn about us", link: "/Dashboard/Managers" },
+    { label: "Workers", ariaLabel: "View our services", link: "/Dashboard/Workers" },
+    { label: "Clients", ariaLabel: "Get in touch", link: "/Dashboard/Clients" },
+    { label: "Messages", ariaLabel: "Get in touch", link: "/Dashboard/Messages" },
   ];
 
   const socialItems = [{ label: "Twitter", link: "/" }];
 
+  const navigate = useNavigate()
+  const [isCreateProject, setIsCreateProject] = useState(false)
   const stats = [
     { icon: FolderOpenDot, label: "Total Projects", value: 0 },
     { icon: FolderDot, label: "Active Projects", value: 0 },
@@ -106,8 +112,8 @@ export default function Owner_Dashboard() {
               Active Project Overview
             </h2>
             <a
-              href="#"
-              className="text-xs font-medium text-[#4682B4] hover:text-[#033363]"
+              onClick={()=>{navigate('/Dashboard/Projects')}}
+              className="text-xs font-medium text-[#4682B4] hover:text-[#033363]   cursor-pointer"
             >
               View all projects →
             </a>
@@ -133,6 +139,12 @@ export default function Owner_Dashboard() {
                 Action
               </span>
             </div>
+
+            {<CreateProjectModal 
+              isOpen={isCreateProject}
+              onClose={()=>(setIsCreateProject(false))}
+              onSubmit={()=>{}}
+            />}
 
             {activeProjects.map((project, i) => {
               const isLast = i === activeProjects.length - 1;
@@ -187,8 +199,8 @@ export default function Owner_Dashboard() {
               Member Progress Monitoring
             </h2>
             <a
-              href="#"
-              className="text-xs font-medium text-[#4682B4] hover:text-[#033363]"
+               onClick={()=>{navigate('/Dashboard/Workers')}}
+              className="text-xs font-medium text-[#4682B4] hover:text-[#033363] cursor-pointer"
             >
               View all members →
             </a>
@@ -270,7 +282,8 @@ export default function Owner_Dashboard() {
       {/* Fixed create-project button */}
       <button
         type="button"
-        className="fixed bottom-6 right-6 flex items-center gap-2 rounded-full bg-[#FF8C00] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-8px_rgba(255,140,0,0.6)] transition-transform hover:scale-105 hover:bg-[#e67e00] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#033363]"
+        className="cursor-pointer fixed bottom-6 right-6 flex items-center gap-2 rounded-full bg-[#FF8C00] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-8px_rgba(255,140,0,0.6)] transition-transform hover:scale-105 hover:bg-[#e67e00] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#033363]"
+        onClick={()=>{setIsCreateProject(true)}}
       >
         <Plus size={18} />
         Create Project

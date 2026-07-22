@@ -23,6 +23,7 @@ app.post('/validation',async (req,res)=>{
     const {email,password,role} = req.body
     const user = await db.query("SELECT * FROM users WHERE email = $1 AND role = $2",[email,role])
     console.log(user)
+    console.log(password)
     try{
         if (!user.rows[0]) {
             console.log("no user")
@@ -56,10 +57,60 @@ app.post('/validation',async (req,res)=>{
 })
 
 
-
-app.post('/projects',async (req,res)=>{
-    
+app.get('/total_members',async (req,res)=>{
+    const get =  await db.query(
+    `SELECT u.email,
+	    u.full_name,
+	    u.id,
+        COUNT(p.id) AS project_count
+        FROM users AS u
+        LEFT JOIN projects AS p ON p.assigned_manager = u.id
+        WHERE u.role = 'manager'
+        GROUP BY u.id, u.full_name, u.email;`
+	   )
+       console.log(get.rows[0])
+       res.json(JSON.stringify(get.rows))
 })
+app.post('/projects',async (req,res)=>{
+    const { name,
+    description,
+    location,
+    assigned_manager,
+    assigned_client,
+    start_date,
+    finish_date,
+    budget,
+    status} = req.body
+
+    console.log(name)
+    console.log(description)
+    console.log(location)
+    console.log( assigned_manager)
+    res.json("success")
+})
+
+app.post('/addManager',async (req,res)=>{
+    const {email, name} =  req.body
+    const saltRounds = 10; // how much computational work the hash requires — 10 is a common default
+    const hashedPassword = await bcrypt.hash('1', saltRounds);
+    const user = await db.query("SELECT email, role FROM users WHERE email = $1 AND role =$2",[email,'manager'])
+    console.log(user.rows)
+    console.log(user)
+    if(user.rows.length != 0){
+        throw new Error("Email already exist")
+    }
+
+    try{
+        await db.query("INSERT INTO users(email,password_hash,full_name,role) VALUES($1,$2,$3,$4)",[email,hashedPassword,name,'manager'])
+        res.status(201).json({ message: "Manager added" });
+    }catch(err){
+        console.log(err)
+        res.status(500).json({ message: "Failed to add manager" });
+    }
+   
+
+})
+
 app.listen(PORT,()=>{
     console.log('Listining to PORT:'+ PORT)
 })

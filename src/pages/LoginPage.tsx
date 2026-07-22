@@ -12,19 +12,19 @@ export default function Login_form(){
             email_name: 'Owner Email',  
         },
         manager: {
-            Dashboard_direct:'/Dashboard/owner',
+            Dashboard_direct:'/Dashboard/manager',
             logo: HardHat,
             name: 'Project manager/contractor',
             email_name: 'Manager Email',  
         },
         worker: {
-            Dashboard_direct:'/Dashboard/owner',
+            Dashboard_direct:'/Dashboard/worker',
             logo: Hammer,
             name: 'Worker/subcontractor',
             email_name: 'Worker Email',  
         },
         client: {
-            Dashboard_direct:'/Dashboard/owner',
+            Dashboard_direct:'/Dashboard/client',
             logo: Handshake,
             name: 'Client',
             email_name: 'Client Email',  

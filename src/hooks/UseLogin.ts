@@ -12,10 +12,7 @@ export async function useLogin(userdetails :{email:string,password:string,role:s
     }
 
     const data = await res.json();
-    console.log(data.user)
     // e.g. save a token so future requests know you're logged in
     localStorage.setItem("token", data.token);
     return data.user
-
-
   }
