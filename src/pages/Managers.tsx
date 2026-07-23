@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { UserPlus, Search, Mail, MoreVertical } from "lucide-react";
 import AddManagerModal from "@/components/AddManagerModal";
-import { get_members } from "@/hooks/OwnerDashboard";
 
 type Manager = {
   id: string;
   full_name: string;
   email: string;
-  project_count: number;
+  project_count: string;
 };
 
 
@@ -30,11 +29,20 @@ export default function ManagersPage() {
   const filtered = memberdets.filter((m) =>
   m.full_name.toLowerCase().includes(query.toLowerCase())
 );
-  async function fetchMembers() {
-  const res = await fetch("http://localhost:3000/total_members");
-  const data = await res.json(); // this is your actual array of rows
-  console.log(data)
-  setMemberdets(data);
+ async function fetchMembers() {
+  try {
+    const res = await fetch("http://localhost:3000/total_members");
+    const data = await res.json();
+
+    if (!Array.isArray(data)) {
+      console.error("Expected an array, got:", data);
+      return; // don't set bad data into state
+    }
+
+    setMemberdets(data);
+  } catch (err) {
+    console.error("Failed to fetch members:", err);
+  }
 }
   
   useEffect(()=>{
@@ -84,7 +92,7 @@ export default function ManagersPage() {
 
         {/* Managers table */}
         <div className="mt-6 rounded-2xl border border-[#033363]/10 bg-white p-6 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-[2fr_1.4fr_1fr_1fr_auto] md:gap-x-4">
+          <div className="grid grid-cols-1 md:grid-cols-[2fr_1.4fr_1fr_auto] md:gap-x-4">
             {/* Column labels */}
             <div className="hidden md:contents">
               <span className="border-b border-[#033363]/10 pb-3 text-[11px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
@@ -95,9 +103,6 @@ export default function ManagersPage() {
               </span>
               <span className="border-b border-[#033363]/10 pb-3 text-[11px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
                 Active Projects
-              </span>
-              <span className="border-b border-[#033363]/10 pb-3 text-[11px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
-                Status
               </span>
               <span className="border-b border-[#033363]/10 pb-3 text-right text-[11px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
                 Action
@@ -155,7 +160,9 @@ export default function ManagersPage() {
       <AddManagerModal
         isOpen = {addManager}
         onClose={()=>{setAddManager(false)}}
-        onSubmit={()=>{}}
+        onSubmit={async () => {
+            await fetchMembers();
+          }}
         />
 
     </section>

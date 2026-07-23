@@ -69,7 +69,7 @@ app.get('/total_members',async (req,res)=>{
         GROUP BY u.id, u.full_name, u.email;`
 	   )
        console.log(get.rows[0])
-       res.json(JSON.stringify(get.rows))
+       res.status(200).json(get.rows);
 })
 app.post('/projects',async (req,res)=>{
     const { name,
