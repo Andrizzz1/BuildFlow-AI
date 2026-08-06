@@ -1,7 +1,7 @@
 import StaggeredMenu from "@/components/StaggeredMenu";
 import logo from "../assets/logo.png";
 import CreateProjectModal from "@/components/CreateProjectModal";
-
+import { useAuth } from "@/components/AuthContext";
 import {
   FolderOpenDot,
   FolderDot,
@@ -13,7 +13,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 export default function Owner_Dashboard() {
+  const { role } = useAuth();
   const menuItems = [
+    { label: "Dashboard", ariaLabel: "Back to dashboard", link: `/Dashboard/${role}` },
     { label: "Projects", ariaLabel: "Go to home page", link: "/Dashboard/Projects" },
     { label: "Managers", ariaLabel: "Learn about us", link: "/Dashboard/Managers" },
     { label: "Workers", ariaLabel: "View our services", link: "/Dashboard/Workers" },

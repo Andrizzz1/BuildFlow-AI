@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState} from "react";
 import { ArrowLeft, Mail, Lock, LogIn, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
 import { useLogin } from "../hooks/UseLogin";
+import { useAuth } from "@/components/AuthContext";
 type LoginPageProps = {
   Dashboard_direct: string;
   logo: LucideIcon;
@@ -26,12 +27,16 @@ export default function Loginlayout({
     role: role
   })
 
+  const { setRole } = useAuth();
+  console.log(Dashboard_direct)
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
+    
     try{
       const user  = await useLogin(userLogindetails)
       if (user){
+        setRole(role);   
         setIsSubmitting(false)
         navigate(Dashboard_direct);
       }

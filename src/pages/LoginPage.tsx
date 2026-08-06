@@ -3,7 +3,6 @@ import { Building2, HardHat, Hammer, Handshake } from "lucide-react";
 import Loginlayout from "../layouts/LoginPageLayout"
 export default function Login_form(){
     const { role } = useParams()
-
     const roles ={
         owner: {
             Dashboard_direct:'/Dashboard/owner',
@@ -31,7 +30,7 @@ export default function Login_form(){
         },
 
     }
-    console.log(roles.owner.Dashboard_direct)
+
     return<section>
         {role === 'owner' && 
             <Loginlayout 
@@ -40,7 +39,7 @@ export default function Login_form(){
             name={roles.owner.name}
             email_name={roles.owner.email_name}
             role="owner"
-
+            
 
             />}
         {role === 'manager' && 

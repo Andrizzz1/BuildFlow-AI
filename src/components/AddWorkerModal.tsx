@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { X, Mail } from "lucide-react";
-import { AddManager } from "@/hooks/AddManager";
-
-export type ManagerDetails = {
+import { AddWorker } from "@/hooks/AddWorker";
+export type WorkerDetails = {
     name:string,
     email:string
 };
 
-type AddManagerModalProps = {
+type AddWorkerModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (details: ManagerDetails) => Promise<void> | void;
+  onSubmit: (details: WorkerDetails) => Promise<void> | void;
 };
 
 const initialForm = {
@@ -19,11 +18,11 @@ const initialForm = {
 
 };
 
-export default function AddManagerModal({
+export default function AddWorkerModal({
   isOpen,
   onClose,
   onSubmit
-}: AddManagerModalProps) {
+}: AddWorkerModalProps) {
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,14 +43,13 @@ export default function AddManagerModal({
 
     setIsSubmitting(true);
     try {
-      await AddManager(form);
-      console.log('proceeded')
+      await AddWorker(form);
       setForm(initialForm);
-      await onSubmit(form)
+      await onSubmit(form); 
       onClose();
     } catch (err) {
       console.log(err)
-      setError(err instanceof Error ? err.message : "Failed to Add Manager.");
+      setError(err instanceof Error ? err.message : "Failed to Add Worker.");
     } finally {
       setIsSubmitting(false);
     }
@@ -72,10 +70,10 @@ export default function AddManagerModal({
         <div className="flex items-center justify-between border-b border-[#033363]/10 px-6 py-5">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#4682B4]">
-              New Manager
+              New Worker
             </p>
             <h2 className="mt-0.5 text-xl font-bold text-[#033363]">
-              Add Manager
+              Add Worker
             </h2>
           </div>
           <button

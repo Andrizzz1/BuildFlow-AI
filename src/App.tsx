@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router"
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "./components/AuthContext";
 import Frontpage from "./pages/FrontPage"
 import Login_form from "./pages/LoginPage"
 import Owner_Dashboard from "./pages/OwnerDashboard"
@@ -14,25 +15,27 @@ import Messages from "./pages/Messenges";
 import Managers from "./pages/Managers";
 function App (){
   return (
+     <AuthProvider>
     <BrowserRouter>
-     <Toaster position="top-center" />
-      <Routes>
-        <Route index element={<Frontpage />} />
-        <Route path="/Login/:role" element={<Login_form />} />
-        <Route element={<MenuLayout/>}>
-          <Route path="/Dashboard/:role" element={<Owner_Dashboard />} />
-          <Route path="/Dashboard/Projects" element={<Projects/>} />
-          <Route path="/Dashboard/Clients" element={<Clients />} />
-          <Route path="/Dashboard/Workers" element={<Workers />} />
-          <Route path="/Dashboard/Messages" element={<Messages />} />
-          <Route path="/Dashboard/Managers" element={<Managers />} />
-        </Route>
-        
-        <Route path="/Dashboard/manager" element={<Manager_Dashboard />} />
-        <Route path="/Dashboard/worker" element={<Worker_Dashboard />} />
-        <Route path="/Dashboard/client" element={<Client_Dashboard/>} />
-      </Routes>
-    </BrowserRouter>
+      <Toaster position="top-center" />
+        <Routes>
+          <Route index element={<Frontpage />} />
+          <Route path="/Login/:role" element={<Login_form />} />
+          <Route element={<MenuLayout/>}>
+            <Route path="/Dashboard/:role" element={<Owner_Dashboard />} />
+            <Route path="/Dashboard/Projects" element={<Projects/>} />
+            <Route path="/Dashboard/Clients" element={<Clients />} />
+            <Route path="/Dashboard/Workers" element={<Workers />} />
+            <Route path="/Dashboard/Messages" element={<Messages />} />
+            <Route path="/Dashboard/Managers" element={<Managers />} />
+          </Route>
+          
+          <Route path="/Dashboard/manager" element={<Manager_Dashboard />} />
+          <Route path="/Dashboard/worker" element={<Worker_Dashboard />} />
+          <Route path="/Dashboard/client" element={<Client_Dashboard/>} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 export default App

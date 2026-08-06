@@ -132,8 +132,6 @@ app.post('/addWorker',async(req,res)=>{
     const saltRounds = 10; // how much computational work the hash requires — 10 is a common default
     const hashedPassword = await bcrypt.hash('1', saltRounds);
     const user = await db.query("SELECT email, role FROM users WHERE email = $1 AND role =$2",[email,'worker'])
-    console.log(user.rows)
-    console.log(user)
     if(user.rows.length != 0){
         throw new Error("Email already exist")
     }

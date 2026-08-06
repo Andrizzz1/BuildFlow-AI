@@ -1,25 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState,useEffect } from "react";
 import { UserPlus, Search, Mail, MoreVertical } from "lucide-react";
 import AddManagerModal from "@/components/AddManagerModal";
-
+import initials from "@/components/Initials";
 type Manager = {
   id: string;
   full_name: string;
   email: string;
   project_count: string;
 };
-
-
-
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 
 export default function ManagersPage() {
@@ -31,7 +19,7 @@ export default function ManagersPage() {
 );
  async function fetchMembers() {
   try {
-    const res = await fetch("http://localhost:3000/total_members");
+    const res = await fetch("http://localhost:3000/total_manager");
     const data = await res.json();
 
     if (!Array.isArray(data)) {
@@ -48,6 +36,7 @@ export default function ManagersPage() {
   useEffect(()=>{
     fetchMembers()
   },[])
+
   
   return (
     <section className="min-h-screen bg-[#FBFCFE] px-6 pb-16 pt-16 lg:px-10">
@@ -160,8 +149,8 @@ export default function ManagersPage() {
       <AddManagerModal
         isOpen = {addManager}
         onClose={()=>{setAddManager(false)}}
-        onSubmit={async () => {
-            await fetchMembers();
+        onSubmit={() => {
+             fetchMembers();
           }}
         />
 
