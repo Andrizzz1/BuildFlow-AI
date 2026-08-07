@@ -17,6 +17,7 @@ export default function Worker_Dashboard(){
     const filtered = memberdets.filter((m) =>
         m.full_name.toLowerCase().includes(query.toLowerCase())
     );
+    
     async function Fetch_workers(){
         try{
             const res = await fetch('http://localhost:3000/total_worker')

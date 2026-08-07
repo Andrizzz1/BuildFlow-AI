@@ -11,9 +11,10 @@ import {
 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 export default function Owner_Dashboard() {
   const { role } = useAuth();
+  const [workerdets, setWorkerdets] = useState<Worker[]>([]);
   const menuItems = [
     { label: "Dashboard", ariaLabel: "Back to dashboard", link: `/Dashboard/${role}` },
     { label: "Projects", ariaLabel: "Go to home page", link: "/Dashboard/Projects" },
@@ -30,7 +31,7 @@ export default function Owner_Dashboard() {
   const stats = [
     { icon: FolderOpenDot, label: "Total Projects", value: 0 },
     { icon: FolderDot, label: "Active Projects", value: 0 },
-    { icon: Pickaxe, label: "Total Workers", value: 0 },
+    { icon: Pickaxe, label: "Total Workers", value: workerdets.length },
   ];
 
   const activeProjects = [
@@ -57,6 +58,23 @@ export default function Owner_Dashboard() {
     Ongoing: "bg-[#FF8C00]/10 text-[#FF8C00]",
     Completed: "bg-emerald-50 text-emerald-600",
   };
+
+      async function Fetch_workers(){
+          try{
+              const res = await fetch('http://localhost:3000/total_worker')
+              const data = await res.json();
+              if (!Array.isArray(data)) {
+                  console.error("Expected an array, got:", data);
+              return; // don't set bad data into state
+              }
+              setWorkerdets(data);
+          }catch(err){
+              console.error("Failed to fetch members:", err);
+          }
+      }
+      useEffect(()=>{
+          Fetch_workers();
+      },[])
 
   return (
     <section className="min-h-screen bg-[#FBFCFE] pb-28">

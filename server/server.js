@@ -86,8 +86,19 @@ app.get('/total_worker',async (req,res)=>{
        console.log(get.rows[0])
        res.status(200).json(get.rows);
 })
+app.get('/projects', async(res,req)=>{
+    const {
+        id,
+        name,
+        location,
+        manager_name,
+        client_name,
+        status,
+        completion
+    } = req.body
 
-app.post('/projects',async (req,res)=>{
+})
+app.post('/createProject',async (req,res)=>{
     const { name,
     description,
     location,
