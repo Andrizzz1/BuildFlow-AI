@@ -1,14 +1,20 @@
-import { useState } from "react";
-import { X, Building2, MapPin, User, Users, Calendar, DollarSign } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X, Building2, MapPin, Users, Calendar, DollarSign } from "lucide-react";
 import { CreateProject } from "@/hooks/CreateProjects";
 type ProjectStatus = "planning" | "active" | "on_hold" | "completed" | "cancelled";
+type Manager = {
+  id: string;
+  full_name: string;
+  email: string;
+  project_count: string;
+};
 
 export type ProjectDetails = {
     name:string,
     description:string,
     location:string,
-    assigned_manager:string,
-    assigned_client:string,
+    assigned_manager:number,
+    assigned_client:number,
     start_date:string,
     finish_date:string,
     budget:number,
@@ -25,8 +31,8 @@ const initialForm = {
   name: "",
   description: "",
   location: "",
-  assigned_manager: "",
-  assigned_client: "",
+  assigned_manager: 0,
+  assigned_client: 0,
   start_date: "",
   finish_date: "",
   budget: 0,
@@ -40,7 +46,17 @@ export default function CreateProjectModal({
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [managers,setManagers] = useState<Manager[]>([])
 
+  async function fetchManager(){
+    const res = await fetch("http://localhost:3000/total_manager")
+    const data = await res.json()
+    setManagers(data)
+  }
+  useEffect(()=>{
+    fetchManager()
+  },[])
+  
   
   if (!isOpen) return null;
 
@@ -72,6 +88,7 @@ export default function CreateProjectModal({
       setIsSubmitting(false);
     }
   }
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -199,24 +216,25 @@ export default function CreateProjectModal({
             {/* Assigned manager */}
             <div>
               <label
-                htmlFor="assigned_manager"
+                htmlFor="status"
                 className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
               >
                 Assigned Manager
               </label>
-              <div className="flex items-center gap-2 rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/30">
-                <User size={18} className="shrink-0 text-[#4682B4]" />
-                <input
-                  id="assigned_manager"
-                  name="assigned_manager"
-                  type="text"
-                  required
-                  value={form.assigned_manager}
-                  onChange={handleChange}
-                  placeholder="Manager name or ID"
-                  className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
-                />
-              </div>
+              
+              <select
+                id="assigned_manager"
+                name="assigned_manager"
+                value={form.assigned_manager}
+                onChange={handleChange}
+                className="w-full rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 text-sm text-[#033363] outline-none transition-colors focus:border-[#00BFFF] focus:ring-2 focus:ring-[#00BFFF]/30"
+              >
+                <option value="planning">Select a manager</option>
+                {managers.map((manager)=>(
+                  <option key={manager.id} value={manager.id}>{manager.full_name}</option>
+                ))}
+                
+              </select>
             </div>
 
             {/* Assigned client */}

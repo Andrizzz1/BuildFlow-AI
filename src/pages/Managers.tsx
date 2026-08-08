@@ -2,7 +2,7 @@ import { useState,useEffect } from "react";
 import { UserPlus, Search, Mail, MoreVertical } from "lucide-react";
 import AddManagerModal from "@/components/AddManagerModal";
 import initials from "@/components/Initials";
-type Manager = {
+export type Manager = {
   id: string;
   full_name: string;
   email: string;

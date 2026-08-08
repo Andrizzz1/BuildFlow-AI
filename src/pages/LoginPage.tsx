@@ -1,7 +1,11 @@
 import { useParams } from "react-router-dom"
-import { Building2, HardHat, Hammer, Handshake } from "lucide-react";
+import { Building2, HardHat, Hammer} from "lucide-react";
 import Loginlayout from "../layouts/LoginPageLayout"
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+
 export default function Login_form(){
+    const navigate = useNavigate()
     const { role } = useParams()
     const roles ={
         owner: {
@@ -21,15 +25,13 @@ export default function Login_form(){
             logo: Hammer,
             name: 'Worker/subcontractor',
             email_name: 'Worker Email',  
-        },
-        client: {
-            Dashboard_direct:'/Dashboard/client',
-            logo: Handshake,
-            name: 'Client',
-            email_name: 'Client Email',  
-        },
-
+        }
     }
+    useEffect(() => {
+        if (role === 'client') {
+            navigate("/Dashboard/client-portal");
+        }
+    }, [role, navigate]);
 
     return<section>
         {role === 'owner' && 
@@ -59,14 +61,6 @@ export default function Login_form(){
                 email_name={roles.worker.email_name}
                 role="worker"
 
-                />}
-        {role === 'client' && 
-                <Loginlayout 
-                Dashboard_direct={roles.client.Dashboard_direct} 
-                logo={roles.client.logo}
-                name={roles.client.name}
-                email_name={roles.client.email_name}
-                role="client"
                 />}
     </section>
 }

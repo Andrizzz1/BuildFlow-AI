@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FolderPlus, Search, MoreVertical, MapPin } from "lucide-react";
-import CreateProjectModal, { type ProjectDetails } from "@/components/CreateProjectModal";
+import CreateProjectModal from "@/components/CreateProjectModal";
 
 
 

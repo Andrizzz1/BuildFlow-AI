@@ -18,12 +18,12 @@ const db = new pg.Client({
 })
 
 db.connect()
-
+const saltRounds = 10; // how much computational work the hash requires — 10 is a common default
 app.post('/validation',async (req,res)=>{
     const {email,password,role} = req.body
+    console.log(email)
+    console.log(role)
     const user = await db.query("SELECT * FROM users WHERE email = $1 AND role = $2",[email,role])
-    console.log(user)
-    console.log(password)
     try{
         if (!user.rows[0]) {
             console.log("no user")
@@ -83,7 +83,6 @@ app.get('/total_worker',async (req,res)=>{
         WHERE u.role = 'worker'
         GROUP BY u.id, u.full_name, u.email;`
 	   )
-       console.log(get.rows[0])
        res.status(200).json(get.rows);
 })
 app.get('/projects', async(res,req)=>{
@@ -125,11 +124,9 @@ app.post('/createProject',async (req,res)=>{
 
 app.post('/addManager',async (req,res)=>{
     const {email, name} =  req.body
-    const saltRounds = 10; // how much computational work the hash requires — 10 is a common default
+    // const saltRounds = 10; 
     const hashedPassword = await bcrypt.hash('1', saltRounds);
     const user = await db.query("SELECT email, role FROM users WHERE email = $1 AND role =$2",[email,'manager'])
-    console.log(user.rows)
-    console.log(user)
     if(user.rows.length != 0){
         throw new Error("Email already exist")
     }
@@ -147,7 +144,7 @@ app.post('/addManager',async (req,res)=>{
 
 app.post('/addWorker',async(req,res)=>{
     const {email, name} =  req.body
-    const saltRounds = 10; // how much computational work the hash requires — 10 is a common default
+    // const saltRounds = 10; // how much computational work the hash requires — 10 is a common default
     const hashedPassword = await bcrypt.hash('1', saltRounds);
     const user = await db.query("SELECT email, role FROM users WHERE email = $1 AND role =$2",[email,'worker'])
     if(user.rows.length != 0){
@@ -161,9 +158,22 @@ app.post('/addWorker',async(req,res)=>{
         console.log(err)
         res.status(500).json({ message: "Failed to add worker" });
     }
-   
+})
 
-
+app.post('/registerClient',async(req,res)=>{
+    const {full_name,email,password} = req.body
+    const hashedPassword = await bcrypt.hash(password,saltRounds)
+    const user = await db.query("SELECT email, role FROM users WHERE email = $1 AND role =$2",[email,'client'])
+    if(user.rows.length !=0){
+        throw new Error("Email already exist")
+    }
+    try{
+        await db.query("INSERT INTO users(email,password_hash,full_name,role) VALUES($1,$2,$3,$4)",[email,hashedPassword,full_name,'client'])
+        res.status(201).json({ message: "Account Successfully created" });
+    }catch(err){
+        res.status(500).json({ message: "Failed to Create an account" });
+    }
+  
 })
 app.listen(PORT,()=>{
     console.log('Listining to PORT:'+ PORT)
