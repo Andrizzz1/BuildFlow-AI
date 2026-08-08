@@ -108,12 +108,19 @@ app.post('/createProject',async (req,res)=>{
     finish_date,
     budget,
     status} = req.body
-
-    console.log(name)
-    console.log(description)
-    console.log(location)
-    console.log( assigned_manager)
-    res.json("success")
+    
+    console.log(assigned_manager)
+    // try{
+    //     await db.query(`
+    //         INSERT INTO projects(name,description,location,assigned_manager,assigned_client,start_date,finish_date,budget,status)
+    //         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
+    //         `,[name,description,location,assigned_manager,assigned_client,start_date,finish_date,budget,status])
+    //         res.status(201).json({message:"Project Added"})
+    // }catch(err){
+    //     console.log(err)
+    //     res.status(500).json({message: "Failed to Add Project"})
+    // }
+    res.json({message:"success"})
 })
 
 app.post('/addManager',async (req,res)=>{
