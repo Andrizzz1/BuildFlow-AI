@@ -7,11 +7,14 @@ import CreateProjectModal from "@/components/CreateProjectModal";
 type Project = {
   id: string;
   name: string;
+  description:string;
   location: string;
-  manager_name: string;
-  client_name: string;
+  start_date: string;
+  finish_date:string;
+  budget:number;
+  manager: string;
+  client: string;
   status: "planning" | "active" | "on_hold" | "completed" | "cancelled";
-  completion: number;
 };
 
 const statusStyles: Record<Project["status"], string> = {
@@ -34,12 +37,12 @@ export default function Projects() {
   const [query, setQuery] = useState("");
   const [projects, setProjects] = useState<Project[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   async function fetchProjects() {
     try {
       const res = await fetch("http://localhost:3000/projects");
       const data = await res.json();
-
+      console.log(data)
       if (!Array.isArray(data)) {
         console.error("Expected an array, got:", data);
         return;
@@ -100,98 +103,230 @@ export default function Projects() {
           </p>
         </div>
 
-        {/* Projects table */}
-        <div className="mt-6 rounded-2xl border border-[#033363]/10 bg-white p-6 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-[1.8fr_1.2fr_1.2fr_1.2fr_1fr_1.2fr_auto] md:gap-x-4">
-            {/* Column labels */}
-            <div className="hidden md:contents">
-              <span className="border-b border-[#033363]/10 pb-3 text-[11px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
-                Project
+      {/* Project cards */}
+      <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {filtered.length === 0 && (
+          <div className="col-span-full rounded-2xl border border-[#033363]/10 bg-white py-16 text-center shadow-sm">
+            <p className="text-sm text-gray-400">
+              No projects found.
+            </p>
+          </div>
+        )}
+
+        {filtered.map((project) => (
+          <button
+            key={project.id}
+            type="button"
+            
+            className="group rounded-2xl border border-[#033363]/10 bg-white p-6 text-left shadow-sm transition-all  hover:border-[#033363]/20 "
+          >
+            {/* Status */}
+            <div className="flex items-center justify-between">
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-medium ${
+                  statusStyles[project.status]
+                }`}
+              >
+                {statusLabels[project.status]}
               </span>
-              <span className="border-b border-[#033363]/10 pb-3 text-[11px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
-                Location
-              </span>
-              <span className="border-b border-[#033363]/10 pb-3 text-[11px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
-                Manager
-              </span>
-              <span className="border-b border-[#033363]/10 pb-3 text-[11px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
-                Client
-              </span>
-              <span className="border-b border-[#033363]/10 pb-3 text-[11px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
-                Status
-              </span>
-              <span className="border-b border-[#033363]/10 pb-3 text-[11px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
-                Completion
-              </span>
-              <span className="border-b border-[#033363]/10 pb-3 text-right text-[11px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
-                Action
-              </span>
+
+              <MoreVertical
+                size={18}
+                className="text-gray-300 "
+              />
             </div>
 
-            {filtered.length === 0 && (
-              <div className="col-span-full py-10 text-center text-sm text-gray-400">
-                No projects found.
+            {/* Project name */}
+            <h3 className="mt-5 text-xl font-semibold text-[#033363]">
+              {project.name}
+            </h3>
+
+            {/* Location */}
+            <div className="mt-2 flex items-center gap-1.5 text-sm text-gray-500">
+              <MapPin size={14} className="text-[#4682B4]" />
+              {project.location}
+            </div>
+
+            {/* Manager */}
+            <div className="mt-6">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
+                Project Manager
+              </p>
+
+              <p className="mt-1 text-sm font-medium text-gray-700">
+                {project.manager || "Unassigned"}
+              </p>
+            </div>
+
+            {/* Client */}
+            <div className="mt-4">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-[#4682B4]/70">
+                Client
+              </p>
+
+              <p className="mt-1 text-sm text-gray-600">
+                {project.client|| "Unassigned"}
+              </p>
+            </div>
+
+            {/* Completion */}
+            <div className="mt-6">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-500">
+                  Completion
+                </span>
+
+                <span className="text-xs font-semibold text-[#033363]">
+                  0%
+                </span>
               </div>
-            )}
 
-            {filtered.map((project, i) => {
-              const isLast = i === filtered.length - 1;
-              const cellBorder = isLast ? "" : "border-b border-[#033363]/5";
-              return (
-                <div key={project.id} className="contents">
-                  <p className={`flex items-center py-4 font-medium text-[#033363] ${cellBorder}`}>
-                    {project.name}
-                  </p>
+              <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+                <div
+                  className="h-full rounded-full bg-[#FF8C00]"
+                  style={{ width: `0%` }}
+                />
+              </div>
+            </div>
 
-                  <div className={`flex items-center gap-1.5 py-4 text-sm text-gray-500 ${cellBorder}`}>
-                    <MapPin size={13} className="shrink-0 text-[#4682B4]" />
-                    {project.location}
-                  </div>
-
-                  <p className={`flex items-center py-4 text-sm text-gray-600 ${cellBorder}`}>
-                    {project.manager_name || "—"}
-                  </p>
-
-                  <p className={`flex items-center py-4 text-sm text-gray-600 ${cellBorder}`}>
-                    {project.client_name || "—"}
-                  </p>
-
-                  <div className={`flex items-center py-4 ${cellBorder}`}>
-                    <span
-                      className={`w-fit rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[project.status]}`}
-                    >
-                      {statusLabels[project.status]}
-                    </span>
-                  </div>
-
-                  <div className={`flex items-center gap-2 py-4 ${cellBorder}`}>
-                    <div className="h-2 w-full max-w-[7rem] rounded-full bg-gray-100">
-                      <div
-                        className="h-full rounded-full bg-[#FF8C00]"
-                        style={{ width: `${project.completion}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      {project.completion}%
-                    </span>
-                  </div>
-
-                  <div className={`flex items-center justify-start py-4 md:justify-end ${cellBorder}`}>
-                    <button
-                      type="button"
-                      aria-label="Project actions"
-                      className="rounded-md p-1.5 text-gray-400 hover:bg-gray-50 hover:text-[#033363]"
-                    >
-                      <MoreVertical size={18} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+            {/* View details */}
+            <div onClick={() => setSelectedProject(project)} className="cursor-pointer hover:underline mt-5 border-t border-[#033363]/5 pt-4 text-xs font-semibold text-[#4682B4]">
+              View project details →
+            </div>
+          </button>
+        ))}
+      </div>
       </div>
 
+      {selectedProject && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#033363]/40 p-4"
+            onClick={() => setSelectedProject(null)}
+          >
+            <div
+              className="w-full max-w-2xl rounded-2xl bg-white p-7 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between">
+                <div>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      statusStyles[selectedProject.status]
+                    }`}
+                  >
+                    {statusLabels[selectedProject.status]}
+                  </span>
+
+                  <h2 className="mt-4 text-2xl font-bold text-[#033363]">
+                    {selectedProject.name}
+                  </h2>
+
+                  <div className="mt-2 flex items-center gap-1.5 text-sm text-gray-500">
+                    <MapPin size={14} className="text-[#4682B4]" />
+                    {selectedProject.location}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedProject(null)}
+                  className="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-[#033363]"
+                >
+                  ✕
+                </button>
+              </div>
+                
+              {/* Project Description*/}
+              <p  className="mt-8  text-xs uppercase tracking-widest text-[#4682B4]/70">Description</p>
+              {selectedProject.description}
+              {/* Project information */}
+              <div className="mt-8 grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-[#4682B4]/70">
+                    Project Manager
+                  </p>
+
+                  <p className="mt-1 font-medium text-gray-700">
+                    {selectedProject.manager || "Unassigned"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-[#4682B4]/70">
+                    Client
+                  </p>
+
+                  <p className="mt-1 font-medium text-gray-700">
+                    {selectedProject.client || "Unassigned"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-[#4682B4]/70">
+                    Start Date
+                  </p>
+
+                  <p className="mt-1 text-gray-700">
+                    {/* use your actual date field here */}
+                    {selectedProject.start_date}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-[#4682B4]/70">
+                    Expected Finish
+                  </p>
+
+                  <p className="mt-1 text-gray-700">
+                    {/* use your actual date field here */}
+                    {selectedProject.finish_date}
+                  </p>
+                </div>
+              </div>
+
+              {/* Completion */}
+              <div className="mt-8">
+                <div className="flex justify-between">
+                  <p className="text-sm font-medium text-gray-600">
+                    Project Progress
+                  </p>
+
+                  <p className="text-sm font-semibold text-[#033363]">
+                    0%
+                  </p>
+                </div>
+
+                <div className="mt-2 h-3 overflow-hidden rounded-full bg-gray-100">
+                  <div
+                    className="h-full rounded-full bg-[#FF8C00]"
+                    style={{
+                      width: `0%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="mt-8 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedProject(null)}
+                  className="rounded-md border border-[#033363]/10 px-4 py-2 text-sm font-medium text-gray-600"
+                >
+                  Close
+                </button>
+
+                <button
+                  type="button"
+                  className="rounded-md bg-[#033363] px-4 py-2 text-sm font-medium text-white"
+                >
+                  Edit Project
+                </button>
+              </div>
+            </div>
+          </div>
+      )}
       {/* Create Project modal */}
       <CreateProjectModal
         isOpen={isCreateOpen}
