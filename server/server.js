@@ -203,6 +203,18 @@ app.post('/registerClient',async(req,res)=>{
     }
   
 })
+
+
+
+app.delete("/projects/:id",async(req,res)=>{
+    const projectId = Number(req.params.id)
+    try{
+        await db.query('DELETE FROM projects WHERE id = $1',[projectId])
+    }catch(err){
+        res.status(500).json({message: `Failed to delete project because of ${err}`})
+    }
+    res.json({message: "Project Deleted"})
+})
 app.listen(PORT,()=>{
     console.log('Listining to PORT:'+ PORT)
 })

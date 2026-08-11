@@ -1,72 +1,82 @@
 import { useEffect, useState } from "react";
-import { X, Building2, MapPin, Users, Calendar, DollarSign } from "lucide-react";
-import { CreateProject } from "@/hooks/CreateProjects";
+import { X, Building2, MapPin, User, Users, Calendar, DollarSign } from "lucide-react";
+
 type ProjectStatus = "planning" | "active" | "on_hold" | "completed" | "cancelled";
-type Manager = {
-  id: string;
-  full_name: string;
-  email: string;
-  project_count: string;
-};
 
 export type ProjectDetails = {
-    name:string,
-    description:string,
-    location:string,
-    assigned_manager:number,
-    assigned_client:number,
-    start_date:string,
-    finish_date:string,
-    budget:number,
-    status: 'planning'|'active'|'on_hold'|'completed'|'cancelled'
+  name: string;
+  description: string;
+  location: string;
+  assigned_manager: string;
+  assigned_client: string;
+  start_date: string;
+  finish_date: string;
+  budget: number;
+  status: ProjectStatus;
+  created_at: string;
 };
 
 type CreateProjectModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (details: ProjectDetails) => Promise<void> | void;
+  /** Pass "edit" to prefill the form and adjust labels for editing an existing project. */
+  mode?: "create" | "edit";
+  /** Values to prefill when mode is "edit". Ignored in create mode. */
+  initialValues?: Partial<ProjectDetails>;
 };
 
-const initialForm = {
+const emptyForm = {
   name: "",
   description: "",
   location: "",
-  assigned_manager: 0,
-  assigned_client: 0,
+  assigned_manager: "",
+  assigned_client: "",
   start_date: "",
   finish_date: "",
-  budget: 0,
+  budget: "",
   status: "planning" as ProjectStatus,
 };
+
+function toFormShape(values?: Partial<ProjectDetails>) {
+  if (!values) return emptyForm;
+  return {
+    name: values.name ?? "",
+    description: values.description ?? "",
+    location: values.location ?? "",
+    assigned_manager: values.assigned_manager ?? "",
+    assigned_client: values.assigned_client ?? "",
+    start_date: values.start_date ?? "",
+    finish_date: values.finish_date ?? "",
+    budget: values.budget !== undefined ? String(values.budget) : "",
+    status: values.status ?? "planning",
+  };
+}
 
 export default function CreateProjectModal({
   isOpen,
   onClose,
+  onSubmit,
+  mode = "create",
+  initialValues,
 }: CreateProjectModalProps) {
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(() => toFormShape(initialValues));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [managers,setManagers] = useState<Manager[]>([])
-  const [clients, setClients] = useState<Manager[]>([])
 
-  async function fetchManager(){
-    const res = await fetch("http://localhost:3000/total_manager")
-    const data = await res.json()
-    setManagers(data)
-  }
+  // Re-sync the form whenever the modal opens with new initial values
+  // (e.g. switching which project is being edited).
+  useEffect(() => {
+    if (isOpen) {
+      setForm(toFormShape(initialValues));
+      setError(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, initialValues]);
 
-  async function fetchClient(){
-    const res = await fetch("http://localhost:3000/total_client")
-    const data = await res.json()
-    setClients(data)
-  }
-  useEffect(()=>{
-    fetchManager()
-    fetchClient()
-  },[])
-  
-  
   if (!isOpen) return null;
+
+  const isEdit = mode === "edit";
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -86,17 +96,22 @@ export default function CreateProjectModal({
 
     setIsSubmitting(true);
     try {
-      await CreateProject(form);
-
-      setForm(initialForm);
+      const details: ProjectDetails = {
+        ...form,
+        budget: Number(form.budget),
+        created_at: isEdit
+          ? initialValues?.created_at ?? new Date().toISOString()
+          : new Date().toISOString(),
+      };
+      await onSubmit(details);
+      setForm(emptyForm);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create project.");
+      setError(err instanceof Error ? err.message : `Failed to ${isEdit ? "update" : "create"} project.`);
     } finally {
       setIsSubmitting(false);
     }
   }
-
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -113,10 +128,10 @@ export default function CreateProjectModal({
         <div className="flex items-center justify-between border-b border-[#033363]/10 px-6 py-5">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#4682B4]">
-              New Project
+              {isEdit ? "Edit Project" : "New Project"}
             </p>
             <h2 className="mt-0.5 text-xl font-bold text-[#033363]">
-              Create Project
+              {isEdit ? "Edit Project" : "Create Project"}
             </h2>
           </div>
           <button
@@ -224,50 +239,49 @@ export default function CreateProjectModal({
             {/* Assigned manager */}
             <div>
               <label
-                htmlFor="status"
+                htmlFor="assigned_manager"
                 className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
               >
                 Assigned Manager
               </label>
-              
-              <select
-                id="assigned_manager"
-                name="assigned_manager"
-                value={form.assigned_manager}
-                onChange={handleChange}
-                className="w-full rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 text-sm text-[#033363] outline-none transition-colors focus:border-[#00BFFF] focus:ring-2 focus:ring-[#00BFFF]/30"
-              >
-                <option value="planning">Select a manager</option>
-                {managers.map((manager)=>(
-                  <option key={manager.id} value={manager.id}>{manager.full_name}</option>
-                ))}
-                
-              </select>
+              <div className="flex items-center gap-2 rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/30">
+                <User size={18} className="shrink-0 text-[#4682B4]" />
+                <input
+                  id="assigned_manager"
+                  name="assigned_manager"
+                  type="text"
+                  required
+                  value={form.assigned_manager}
+                  onChange={handleChange}
+                  placeholder="Manager name or ID"
+                  className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
+                />
+              </div>
             </div>
 
             {/* Assigned client */}
             <div>
               <label
-                htmlFor="status"
+                htmlFor="assigned_client"
                 className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
               >
                 Assigned Client
               </label>
-              
-              <select
-                id="assigned_client"
-                name="assigned_client"
-                value={form.assigned_manager}
-                onChange={handleChange}
-                className="w-full rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 text-sm text-[#033363] outline-none transition-colors focus:border-[#00BFFF] focus:ring-2 focus:ring-[#00BFFF]/30"
-              >
-                <option value="planning">Select a manager</option>
-                {clients.map((client)=>(
-                  <option key={client.id} value={client.id}>{client.full_name}</option>
-                ))}
-                
-              </select>
+              <div className="flex items-center gap-2 rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/30">
+                <Users size={18} className="shrink-0 text-[#4682B4]" />
+                <input
+                  id="assigned_client"
+                  name="assigned_client"
+                  type="text"
+                  required
+                  value={form.assigned_client}
+                  onChange={handleChange}
+                  placeholder="Client name or ID"
+                  className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
+                />
+              </div>
             </div>
+
             {/* Start date */}
             <div>
               <label
@@ -358,7 +372,13 @@ export default function CreateProjectModal({
               disabled={isSubmitting}
               className="rounded-md bg-[#FF8C00] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#e67e00] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmitting ? "Creating..." : "Create Project"}
+              {isSubmitting
+                ? isEdit
+                  ? "Saving..."
+                  : "Creating..."
+                : isEdit
+                ? "Save Changes"
+                : "Create Project"}
             </button>
           </div>
         </form>
