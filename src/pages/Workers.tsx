@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { UserPlus, Search, Mail, MoreVertical } from "lucide-react";
 import initials from "@/components/Initials";
 import AddWorkerModal from "@/components/AddWorkerModal";
-type Worker = {
+export type Worker = {
   id: string;
   full_name: string;
   email: string;

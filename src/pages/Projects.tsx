@@ -125,6 +125,11 @@ export default function Projects() {
     }
   }
 
+
+  function toDateInputValue(value?: string): string {
+  if (!value) return "";
+    return value.slice(0, 10); // "2026-03-03T00:00:00.000Z" → "2026-03-03"
+  }
   // Map a Project (display-shaped) into the ProjectDetails shape the modal expects,
   // for prefilling the edit form. NOTE: this page's Project type stores manager/client
   // as readable names, while CreateProjectModal's ProjectDetails expects
@@ -137,8 +142,8 @@ export default function Projects() {
       location: project.location,
       assigned_manager: project.manager,
       assigned_client: project.client,
-      start_date: project.start_date,
-      finish_date: project.finish_date,
+      start_date: toDateInputValue(project.start_date),
+      finish_date: toDateInputValue(project.finish_date),
       budget: project.budget,
       status: project.status,
     };
@@ -386,7 +391,13 @@ export default function Projects() {
             </div>
 
             <p className="mt-8 text-xs uppercase tracking-widest text-[#4682B4]/70">Budget</p>
-            ₱ {selectedProject.budget}
+            <div className="flex items-center">
+              <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[#4682B4] font-semibold">
+                ₱
+              </span>
+              {selectedProject.budget}
+
+            </div>
 
             {/* Completion */}
             <div className="mt-8">
@@ -484,7 +495,7 @@ export default function Projects() {
         mode="edit"
         initialValues={editingProject ? toEditInitialValues(editingProject) : undefined}
         onClose={() => setEditingProject(null)}
-        onSubmit={handleEditProject}
+        onSubmit={(handleEditProject)}
       />
     </section>
   );

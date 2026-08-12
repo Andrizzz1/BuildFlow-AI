@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
-import { X, Building2, MapPin, User, Users, Calendar, DollarSign } from "lucide-react";
-
+import { X, Building2, MapPin, Users, Calendar} from "lucide-react";
+import type{ Manager } from "@/pages/Managers";
+import type{ Client } from "@/pages/Clients";
 type ProjectStatus = "planning" | "active" | "on_hold" | "completed" | "cancelled";
 
 export type ProjectDetails = {
   name: string;
   description: string;
   location: string;
-  assigned_manager: string;
-  assigned_client: string;
+  assigned_manager: number;
+  assigned_client: number;
   start_date: string;
   finish_date: string;
   budget: number;
   status: ProjectStatus;
   created_at: string;
 };
+
 
 type CreateProjectModalProps = {
   isOpen: boolean;
@@ -31,7 +33,7 @@ const emptyForm = {
   description: "",
   location: "",
   assigned_manager: "",
-  assigned_client: "",
+  assigned_client:"",
   start_date: "",
   finish_date: "",
   budget: "",
@@ -40,11 +42,12 @@ const emptyForm = {
 
 function toFormShape(values?: Partial<ProjectDetails>) {
   if (!values) return emptyForm;
+  
   return {
     name: values.name ?? "",
     description: values.description ?? "",
     location: values.location ?? "",
-    assigned_manager: values.assigned_manager ?? "",
+    assigned_manager: values.assigned_manager ?? "Select Manager",
     assigned_client: values.assigned_client ?? "",
     start_date: values.start_date ?? "",
     finish_date: values.finish_date ?? "",
@@ -62,11 +65,40 @@ export default function CreateProjectModal({
 }: CreateProjectModalProps) {
   const [form, setForm] = useState(() => toFormShape(initialValues));
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [managers, setManagers] = useState<Manager[]>([])
+  const [clients, setClients] = useState<Client[]>([])
   const [error, setError] = useState<string | null>(null);
 
+  async function fetch_managers(){
+    try{
+      const res = await fetch("http://localhost:3000/total_manager")
+      const data =await res.json()
+      setManagers(data)
+
+    }catch(err){
+      console.log("failed to fetch manager because of" + err)
+    }
+
+  }
+  async function fetch_client(){
+    try{
+      const res = await fetch("http://localhost:3000/total_client")
+      const data =await res.json()
+      setClients(data)
+
+    }catch(err){
+      console.log("failed to fetch worker because of" + err)
+    }
+
+  }
+
+  
   // Re-sync the form whenever the modal opens with new initial values
   // (e.g. switching which project is being edited).
   useEffect(() => {
+    fetch_managers()
+    fetch_client()
+    
     if (isOpen) {
       setForm(toFormShape(initialValues));
       setError(null);
@@ -98,6 +130,8 @@ export default function CreateProjectModal({
     try {
       const details: ProjectDetails = {
         ...form,
+        assigned_manager: Number(form.assigned_manager),
+        assigned_client: Number(form.assigned_client),
         budget: Number(form.budget),
         created_at: isEdit
           ? initialValues?.created_at ?? new Date().toISOString()
@@ -235,8 +269,7 @@ export default function CreateProjectModal({
                 <option value="cancelled">Cancelled</option>
               </select>
             </div>
-
-            {/* Assigned manager */}
+              {/* Assigned manager */}
             <div>
               <label
                 htmlFor="assigned_manager"
@@ -244,20 +277,20 @@ export default function CreateProjectModal({
               >
                 Assigned Manager
               </label>
-              <div className="flex items-center gap-2 rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/30">
-                <User size={18} className="shrink-0 text-[#4682B4]" />
-                <input
-                  id="assigned_manager"
-                  name="assigned_manager"
-                  type="text"
-                  required
-                  value={form.assigned_manager}
-                  onChange={handleChange}
-                  placeholder="Manager name or ID"
-                  className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
-                />
-              </div>
+              <select
+                id="assigned_manager"
+                name="assigned_manager"
+                value={form.assigned_manager}
+                onChange={handleChange}
+                className="w-full rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 text-sm text-[#033363] outline-none transition-colors focus:border-[#00BFFF] focus:ring-2 focus:ring-[#00BFFF]/30"
+              >
+                <option value="">Select Manager</option>
+                {managers.map(manager=>(
+                   <option value={manager.full_name} key={manager.id}>{manager.full_name}</option>
+                ))}
+              </select>
             </div>
+
 
             {/* Assigned client */}
             <div>
@@ -267,18 +300,39 @@ export default function CreateProjectModal({
               >
                 Assigned Client
               </label>
+
               <div className="flex items-center gap-2 rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/30">
                 <Users size={18} className="shrink-0 text-[#4682B4]" />
-                <input
-                  id="assigned_client"
-                  name="assigned_client"
-                  type="text"
-                  required
-                  value={form.assigned_client}
-                  onChange={handleChange}
-                  placeholder="Client name or ID"
-                  className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
-                />
+
+                {isEdit ? (
+                  <input
+                    disabled
+                    id="assigned_client"
+                    name="assigned_client"
+                    type="text"
+                    required
+                    value={form.assigned_client}
+                    onChange={handleChange}
+                    placeholder="Client name or ID"
+                    className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
+                  />
+                ) : (
+                  <select
+                    id="assigned_client"
+                    name="assigned_client"
+                    value={form.assigned_client}
+                    onChange={handleChange}
+                    className="w-full bg-transparent text-sm text-[#033363] outline-none"
+                  >
+                    <option value="">Select Client</option>
+
+                    {clients.map((client) => (
+                      <option value={client.full_name} key={client.id}>
+                        {client.full_name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
 
@@ -335,7 +389,9 @@ export default function CreateProjectModal({
                 Budget
               </label>
               <div className="flex items-center gap-2 rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/30">
-                <DollarSign size={18} className="shrink-0 text-[#4682B4]" />
+                <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[#4682B4] font-semibold">
+                  ₱
+                </span>
                 <input
                   id="budget"
                   name="budget"

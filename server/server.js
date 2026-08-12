@@ -136,7 +136,6 @@ app.post('/createProject',async (req,res)=>{
     budget,
     status} = req.body
     
-    console.log(assigned_manager)
     try{
         await db.query(`
             INSERT INTO projects(name,description,location,assigned_manager,assigned_client,start_date,finish_date,budget,status)
@@ -204,8 +203,42 @@ app.post('/registerClient',async(req,res)=>{
   
 })
 
+//put reqs
+app.put("/projects/:id", async(req,res)=>{  
+    const {id} = req.params
 
+    const { name,
+    description,
+    location,
+    assigned_manager,
+    assigned_client,
+    start_date,
+    finish_date,
+    budget,
+    status} = req.body
+    
+    try {
+        await db.query(`
+            UPDATE projects
+            SET name = $1, 
+            description = $2,
+            location = $3,
+            assigned_manager = $4,
+            assigned_client = $5,
+            start_date = $6,
+            finish_date = $7,
+            budget = $8,
+            status = $9
+            WHERE id = $10`,
+            [name,description,location,assigned_manager,assigned_client,start_date,finish_date,budget,status,id])
+        res.status(201).json({message: `Successfully Created`})
 
+    }catch(err){
+        console.log(err)
+        res.status(500).json({message: `Failed to update project because of ${err}`})
+    }
+})
+//delete reqs
 app.delete("/projects/:id",async(req,res)=>{
     const projectId = Number(req.params.id)
     try{
