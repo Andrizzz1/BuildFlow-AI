@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { FolderPlus, Search, MoreVertical, MapPin, Pencil, Trash2 } from "lucide-react";
 import CreateProjectModal, { type ProjectDetails } from "@/components/CreateProjectModal";
 
-type Project = {
+export type Project = {
   id: string;
   name: string;
   description: string;
@@ -10,7 +10,9 @@ type Project = {
   start_date: string;
   finish_date: string;
   budget: number;
+  assigned_manager: number;
   manager: string;
+  assigned_client:number;
   client: string;
   status: "planning" | "active" | "on_hold" | "completed" | "cancelled";
 };
@@ -140,8 +142,8 @@ export default function Projects() {
       name: project.name,
       description: project.description,
       location: project.location,
-      assigned_manager: project.manager,
-      assigned_client: project.client,
+      assigned_manager: project.assigned_manager,
+      assigned_client: project.assigned_client,
       start_date: toDateInputValue(project.start_date),
       finish_date: toDateInputValue(project.finish_date),
       budget: project.budget,

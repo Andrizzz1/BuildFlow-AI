@@ -286,7 +286,7 @@ export default function CreateProjectModal({
               >
                 <option value="">Select Manager</option>
                 {managers.map(manager=>(
-                   <option value={manager.full_name} key={manager.id}>{manager.full_name}</option>
+                   <option value={manager.id} key={manager.id}>{manager.full_name}</option>
                 ))}
               </select>
             </div>
@@ -327,7 +327,7 @@ export default function CreateProjectModal({
                     <option value="">Select Client</option>
 
                     {clients.map((client) => (
-                      <option value={client.full_name} key={client.id}>
+                      <option value={client.id} key={client.id}>
                         {client.full_name}
                       </option>
                     ))}

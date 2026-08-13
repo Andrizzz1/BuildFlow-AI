@@ -112,7 +112,9 @@ app.get('/projects', async(req,res)=>{
             p.finish_date,
             p.budget,
             p.status,
+            p.assigned_manager,
             u.full_name AS manager,
+            p.assigned_client,
             us.full_name AS client
     FROM projects AS p
     LEFT JOIN users AS u ON u.id = p.assigned_manager
@@ -121,6 +123,7 @@ app.get('/projects', async(req,res)=>{
     res.status(200).json(data.rows);
     }catch(err){
         console.log(err)
+        res.status(500).json({message:"Failed to fetch projects"})
     }
 
 
@@ -135,7 +138,7 @@ app.post('/createProject',async (req,res)=>{
     finish_date,
     budget,
     status} = req.body
-    
+    console.log(assigned_client)
     try{
         await db.query(`
             INSERT INTO projects(name,description,location,assigned_manager,assigned_client,start_date,finish_date,budget,status)

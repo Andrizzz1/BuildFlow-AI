@@ -2,6 +2,7 @@ import StaggeredMenu from "@/components/StaggeredMenu";
 import logo from "../assets/logo.png";
 import CreateProjectModal from "@/components/CreateProjectModal";
 import { useAuth } from "@/components/AuthContext";
+import type{ Project } from "./Projects";
 import {
   FolderOpenDot,
   FolderDot,
@@ -15,6 +16,7 @@ import { useState, useEffect } from "react";
 export default function Owner_Dashboard() {
   const { role } = useAuth();
   const [workerdets, setWorkerdets] = useState<Worker[]>([]);
+  const [totalPorjects, setTotalProjects] = useState<Project[]>([])
   const menuItems = [
     { label: "Dashboard", ariaLabel: "Back to dashboard", link: `/Dashboard/${role}` },
     { label: "Projects", ariaLabel: "Go to home page", link: "/Dashboard/Projects" },
@@ -29,8 +31,8 @@ export default function Owner_Dashboard() {
   const navigate = useNavigate()
   const [isCreateProject, setIsCreateProject] = useState(false)
   const stats = [
-    { icon: FolderOpenDot, label: "Total Projects", value: 0 },
-    { icon: FolderDot, label: "Active Projects", value: 0 },
+    { icon: FolderOpenDot, label: "Total Projects", value:totalPorjects.length },
+    { icon: FolderDot, label: "Active Projects", value: 0},
     { icon: Pickaxe, label: "Total Workers", value: workerdets.length },
   ];
 
@@ -58,22 +60,32 @@ export default function Owner_Dashboard() {
     Ongoing: "bg-[#FF8C00]/10 text-[#FF8C00]",
     Completed: "bg-emerald-50 text-emerald-600",
   };
+  async function Fetch_projects(){
+    try{
+      const res = await fetch("http://localhost:3000/projects")
+      const data = await res.json()
+       setTotalProjects(data)
+    }catch(err){
+      console.log(err)
+    }
 
-      async function Fetch_workers(){
-          try{
-              const res = await fetch('http://localhost:3000/total_worker')
-              const data = await res.json();
-              if (!Array.isArray(data)) {
-                  console.error("Expected an array, got:", data);
-              return; // don't set bad data into state
-              }
-              setWorkerdets(data);
-          }catch(err){
-              console.error("Failed to fetch members:", err);
+  }
+  async function Fetch_workers(){
+      try{
+          const res = await fetch('http://localhost:3000/total_worker')
+          const data = await res.json();
+          if (!Array.isArray(data)) {
+              console.error("Expected an array, got:", data);
+          return; // don't set bad data into state
           }
+          setWorkerdets(data);
+      }catch(err){
+          console.error("Failed to fetch members:", err);
+      }
       }
       useEffect(()=>{
           Fetch_workers();
+          Fetch_projects();
       },[])
 
   return (
