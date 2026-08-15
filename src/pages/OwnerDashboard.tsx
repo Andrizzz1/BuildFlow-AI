@@ -14,11 +14,12 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 export default function Owner_Dashboard() {
-  const { role } = useAuth();
+  const { user } = useAuth();
+  console.log("role at render:", user?.role);
   const [workerdets, setWorkerdets] = useState<Worker[]>([]);
   const [totalPorjects, setTotalProjects] = useState<Project[]>([])
   const menuItems = [
-    { label: "Dashboard", ariaLabel: "Back to dashboard", link: `/Dashboard/${role}` },
+    { label: "Dashboard", ariaLabel: "Back to dashboard", link: `/Dashboard/${user?.role}` },
     { label: "Projects", ariaLabel: "Go to home page", link: "/Dashboard/Projects" },
     { label: "Managers", ariaLabel: "Learn about us", link: "/Dashboard/Managers" },
     { label: "Workers", ariaLabel: "View our services", link: "/Dashboard/Workers" },

@@ -14,6 +14,7 @@ import Workers from "./pages/Workers";
 import Messages from "./pages/Messenges";
 import Managers from "./pages/Managers";
 import ClientAuthPage from "./pages/client_portal";
+import ChangePasswordPage from "./pages/changePassword";
 function App (){
   return (
      <AuthProvider>
@@ -35,6 +36,7 @@ function App (){
           <Route path="/Dashboard/worker" element={<Worker_Dashboard />} />
           <Route path="/Dashboard/client" element={<Client_Dashboard/>} />
           <Route path="/Dashboard/client-portal" element={<ClientAuthPage />} />
+          <Route path="/Change-password" element={<ChangePasswordPage  />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

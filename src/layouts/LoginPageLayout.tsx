@@ -27,7 +27,7 @@ export default function Loginlayout({
     role: role
   })
 
-  const { setRole } = useAuth();
+  const { setUser } = useAuth();
   console.log(Dashboard_direct)
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -36,9 +36,13 @@ export default function Loginlayout({
     try{
       const user  = await useLogin(userLogindetails)
       if (user){
-        setRole(role);   
+        setUser({ ...user, role });  
         setIsSubmitting(false)
-        navigate(Dashboard_direct);
+        if (userLogindetails.password === "1"){
+          navigate("/Change-password")
+        }else{
+          navigate(Dashboard_direct);
+        }
       }
     }catch(err){
       console.log(err)
@@ -169,6 +173,7 @@ export default function Loginlayout({
                       onChange={handleChange}
                     />
                   </div>
+                  <p className="text-center mt-1.5 text-xs text-[#033363] cursor-pointer">Forgot Password</p>
                 </div>
               </div>
 
