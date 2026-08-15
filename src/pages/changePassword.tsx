@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   Mail,
@@ -10,18 +11,20 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-type Step = "request" | "verify" | "done";
+type Step = "verify" | "change" | "done";
 
 export default function ChangePasswordPage() {
-  const navigate = useNavigate();
-  const [step, setStep] = useState<Step>("request");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [step, setStep] = useState<Step>(location.state?.email ?"change":"verify");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+    const [email, setEmail] = useState(location.state?.email ?? "");
+    const [code, setCode] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+
 
   async function handleRequestCode(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -112,9 +115,9 @@ export default function ChangePasswordPage() {
           </div>
 
           <p className="mt-6 max-w-sm text-sm text-gray-500">
-            {step === "request" &&
-              "Enter the email linked to your account and we'll send you a verification code."}
             {step === "verify" &&
+              "Enter the email linked to your account and we'll send you a verification code."}
+            {step === "change" &&
               "Enter the code we sent you and choose a new password."}
             {step === "done" &&
               "Your password has been updated. You can now sign in with your new password."}
@@ -144,13 +147,13 @@ export default function ChangePasswordPage() {
             <div className="rounded-sm border border-[#033363]/15 bg-white/80 p-8 shadow-[0_20px_60px_-15px_rgba(3,51,99,0.25)] backdrop-blur-sm sm:p-10">
               {/* Step indicator */}
               <div className="mb-6 flex items-center gap-2">
-                {(["request", "verify", "done"] as Step[]).map((s, i) => (
-                  <div key={s} className="flex flex-1 items-center gap-2">
+                {(["verify", "change", "done"] as Step[]).map((s, i) => (
+                  <div key={i} className="flex flex-1 items-center gap-2">
                     <div
                       className={`h-1.5 flex-1 rounded-full transition-colors ${
                         step === s ||
-                        (step === "verify" && s === "request") ||
-                        step === "done"
+                        (step === "change" && s === "verify") ||
+                        step === "done" 
                           ? "bg-[#00BFFF]"
                           : "bg-[#4682B4]/15"
                       }`}
@@ -162,7 +165,7 @@ export default function ChangePasswordPage() {
               {step !== "done" && (
                 <div className="mb-6 flex items-center justify-between border-b border-dashed border-[#4682B4]/30 pb-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#4682B4]">
-                    {step === "request" ? "// Find Account" : "// Verify & Reset"}
+                    {step === "verify" ? "// Find Account" : "// Verify & Reset"}
                   </p>
                   <span className="text-[10px] uppercase tracking-[0.2em] text-[#FF8C00]">
                     Required
@@ -171,7 +174,7 @@ export default function ChangePasswordPage() {
               )}
 
               {/* Step 1: request code */}
-              {step === "request" && (
+              {step === "verify" && !email && (
                 <form onSubmit={handleRequestCode} className="space-y-5">
                   <div>
                     <label
@@ -223,8 +226,10 @@ export default function ChangePasswordPage() {
               )}
 
               {/* Step 2: verify code + set new password */}
-              {step === "verify" && (
+              {step === "change" &&(
+
                 <form onSubmit={handleResetPassword} className="space-y-5">
+                {!email &&(
                   <div>
                     <label
                       htmlFor="code"
@@ -250,6 +255,7 @@ export default function ChangePasswordPage() {
                       Sent to {email || "your email"}.
                     </p>
                   </div>
+                )}
 
                   <div>
                     <label
@@ -320,14 +326,16 @@ export default function ChangePasswordPage() {
                       </>
                     )}
                   </button>
-
+                    {!email && (
                   <button
                     type="button"
-                    onClick={() => setStep("request")}
+                    onClick={() => setStep("verify")}
                     className="w-full text-center text-xs font-medium text-[#4682B4] hover:text-[#033363] hover:underline"
                   >
                     Use a different email
                   </button>
+
+                    )}
                 </form>
               )}
 

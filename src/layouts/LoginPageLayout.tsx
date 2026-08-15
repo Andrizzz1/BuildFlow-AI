@@ -39,7 +39,7 @@ export default function Loginlayout({
         setUser({ ...user, role });  
         setIsSubmitting(false)
         if (userLogindetails.password === "1"){
-          navigate("/Change-password")
+          navigate("/Change-password", {state: {email: userLogindetails.email}})
         }else{
           navigate(Dashboard_direct);
         }
@@ -173,7 +173,7 @@ export default function Loginlayout({
                       onChange={handleChange}
                     />
                   </div>
-                  <p className="text-center mt-1.5 text-xs text-[#033363] cursor-pointer">Forgot Password</p>
+                  <p onClick={()=>{navigate("/Change-password")}} className="text-center mt-1.5 text-xs text-[#033363] cursor-pointer">Forgot Password</p>
                 </div>
               </div>
 

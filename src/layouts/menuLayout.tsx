@@ -4,10 +4,10 @@ import { useAuth } from "@/components/AuthContext";
 import StaggeredMenu from "@/components/StaggeredMenu";
 import logo from '../assets/logo.png'
 export default function MenuLayout() {
-  const { role } = useAuth();
+  const { user } = useAuth();
     
   const menuItems = [
-    { label: "Dashboard", ariaLabel: "Back to dashboard", link: `/Dashboard/${role}` },
+    { label: "Dashboard", ariaLabel: "Back to dashboard", link: `/Dashboard/${user?.role}` },
     { label: "Projects", ariaLabel: "Go to home page", link: "/Dashboard/Projects" },
     { label: "Managers", ariaLabel: "Learn about us", link: "/Dashboard/Managers" },
     { label: "Workers", ariaLabel: "View our services", link: "/Dashboard/Workers" },
