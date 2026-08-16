@@ -1,7 +1,10 @@
-import { useState,useEffect } from "react";
-import { UserPlus, Search, Mail, MoreVertical } from "lucide-react";
+import { useState, useEffect } from "react";
+import { UserPlus, Search, Mail, Trash2 } from "lucide-react";
 import AddManagerModal from "@/components/AddManagerModal";
+import RowActionsMenu from "@/components/RowActionsMenu";
 import initials from "@/components/Initials";
+import { useNavigate } from "react-router-dom";
+
 export type Manager = {
   id: string;
   full_name: string;
@@ -9,35 +12,60 @@ export type Manager = {
   project_count: string;
 };
 
-
 export default function ManagersPage() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [memberdets, setMemberdets] = useState<Manager[]>([]);
-  const [addManager,setAddManager] = useState(false)
+  const [addManager, setAddManager] = useState(false);
+
+  // Delete confirmation
+  const [deleteTarget, setDeleteTarget] = useState<Manager | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const filtered = memberdets.filter((m) =>
-  m.full_name.toLowerCase().includes(query.toLowerCase())
-);
- async function fetchMembers() {
-  try {
-    const res = await fetch("http://localhost:3000/total_manager");
-    const data = await res.json();
+    m.full_name.toLowerCase().includes(query.toLowerCase())
+  );
 
-    if (!Array.isArray(data)) {
-      console.error("Expected an array, got:", data);
-      return; // don't set bad data into state
+  async function fetchMembers() {
+    try {
+      const res = await fetch("http://localhost:3000/total_manager");
+      const data = await res.json();
+
+      if (!Array.isArray(data)) {
+        console.error("Expected an array, got:", data);
+        return;
+      }
+      setMemberdets(data);
+    } catch (err) {
+      console.error("Failed to fetch members:", err);
     }
-
-    setMemberdets(data);
-  } catch (err) {
-    console.error("Failed to fetch members:", err);
   }
-}
-  
-  useEffect(()=>{
-    fetchMembers()
-  },[])
 
-  
+  useEffect(() => {
+    fetchMembers();
+  }, []);
+
+  async function handleDeleteManager() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    console.log(deleteTarget.id)
+    try {
+      const res = await fetch(`http://localhost:3000/user/${deleteTarget.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete manager.");
+      await fetchMembers();
+      setDeleteTarget(null);
+    } catch (err) {
+      console.log(err)
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete manager.");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <section className="min-h-screen bg-[#FBFCFE] px-6 pb-16 pt-16 lg:px-10">
       <div className="mx-auto max-w-7xl">
@@ -53,9 +81,9 @@ export default function ManagersPage() {
           </div>
 
           <button
-          onClick={()=>setAddManager(true)}
+            onClick={() => setAddManager(true)}
             type="button"
-            className="flex items-center gap-2 self-start rounded-md bg-[#FF8C00] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_25px_-8px_rgba(255,140,0,0.5)] transition-colors hover:bg-[#e67e00] focus-visible:outline  focus-visible:outline-offset-2 focus-visible:outline-[#033363] sm:self-auto"
+            className="flex items-center gap-2 self-start rounded-md bg-[#FF8C00] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_25px_-8px_rgba(255,140,0,0.5)] transition-colors hover:bg-[#e67e00] focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[#033363] sm:self-auto"
           >
             <UserPlus size={18} />
             Add Manager
@@ -127,15 +155,12 @@ export default function ManagersPage() {
                     {manager.project_count}
                   </p>
 
-
                   <div className={`flex items-center justify-start py-4 md:justify-end ${cellBorder}`}>
-                    <button
-                      type="button"
-                      aria-label="Manager actions"
-                      className="rounded-md p-1.5 text-gray-400 hover:bg-gray-50 hover:text-[#033363]"
-                    >
-                      <MoreVertical size={18} />
-                    </button>
+                    <RowActionsMenu
+                      entityLabel="Manager"
+                      onMessage={() => navigate("/Dashboard/Messages")}
+                      onDelete={() => setDeleteTarget(manager)}
+                    />
                   </div>
                 </div>
               );
@@ -144,16 +169,62 @@ export default function ManagersPage() {
         </div>
       </div>
 
-      {/*Adding manager Modal */}
-
+      {/* Add manager modal */}
       <AddManagerModal
-        isOpen = {addManager}
-        onClose={()=>{setAddManager(false)}}
+        isOpen={addManager}
+        onClose={() => setAddManager(false)}
         onSubmit={() => {
-             fetchMembers();
-          }}
-        />
+          fetchMembers();
+        }}
+      />
 
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#033363]/40 p-4"
+          onClick={() => !isDeleting && setDeleteTarget(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-red-50">
+              <Trash2 size={20} className="text-red-500" />
+            </div>
+            <h3 className="mt-4 text-lg font-bold text-[#033363]">
+              Delete {deleteTarget.full_name}?
+            </h3>
+            <p className="mt-1.5 text-sm text-gray-500">
+              This will remove this manager's account. This action can't be undone.
+            </p>
+
+            {deleteError && (
+              <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+                {deleteError}
+              </p>
+            )}
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-md px-4 py-2.5 text-sm font-medium text-[#4682B4] transition-colors hover:bg-gray-50 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleDeleteManager}
+                className="rounded-md bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

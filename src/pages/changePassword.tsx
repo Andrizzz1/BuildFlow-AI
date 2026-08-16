@@ -16,6 +16,7 @@ type Step = "verify" | "change" | "done";
 export default function ChangePasswordPage() {
     const location = useLocation();
     const navigate = useNavigate();
+    const cameFromForcedReset = Boolean(location.state?.email);
     const [step, setStep] = useState<Step>(location.state?.email ?"change":"verify");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -31,13 +32,16 @@ export default function ChangePasswordPage() {
     setError(null);
     setIsSubmitting(true);
     try {
-      const res = await fetch("http://localhost:3000/forgot-password", {
+      const res = await fetch("http://localhost:3000/check_email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
       if (!res.ok) throw new Error("Couldn't find an account with that email.");
-      setStep("verify");
+      const data =await res.json()
+      console.log(data)
+      setStep("change");
+
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -174,7 +178,7 @@ export default function ChangePasswordPage() {
               )}
 
               {/* Step 1: request code */}
-              {step === "verify" && !email && (
+              {step === "verify" && (
                 <form onSubmit={handleRequestCode} className="space-y-5">
                   <div>
                     <label
@@ -213,12 +217,12 @@ export default function ChangePasswordPage() {
                     {isSubmitting ? (
                       <>
                         <Loader2 size={18} className="animate-spin" />
-                        Sending code…
+                        Searching…
                       </>
                     ) : (
                       <>
-                        Send Reset Code
-                        <KeyRound size={18} />
+                        Search email
+                        <Mail size={18}/>
                       </>
                     )}
                   </button>
@@ -229,7 +233,7 @@ export default function ChangePasswordPage() {
               {step === "change" &&(
 
                 <form onSubmit={handleResetPassword} className="space-y-5">
-                {!email &&(
+                {!cameFromForcedReset &&(
                   <div>
                     <label
                       htmlFor="code"

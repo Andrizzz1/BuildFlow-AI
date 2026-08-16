@@ -21,8 +21,6 @@ db.connect()
 const saltRounds = 10; // how much computational work the hash requires — 10 is a common default
 app.post('/validation',async (req,res)=>{
     const {email,password,role} = req.body
-    console.log(email)
-    console.log(role)
     const user = await db.query("SELECT * FROM users WHERE email = $1 AND role = $2",[email,role])
     try{
         if (!user.rows[0]) {
@@ -46,9 +44,7 @@ app.post('/validation',async (req,res)=>{
                 role: user.rows[0].role,
                 name: user.rows[0].full_name,
             },
-});
-    
-    
+    });   
     }catch(err){
         console.log("REAL ERROR:", err)
        res.status(401).json({ message: err.message });
@@ -120,13 +116,45 @@ app.get('/projects', async(req,res)=>{
     LEFT JOIN users AS u ON u.id = p.assigned_manager
     LEFT JOIN users AS us ON us.id = p.assigned_client `)
 
-    res.status(200).json(data.rows);
+    res.status(201).json(data.rows);
     }catch(err){
         console.log(err)
         res.status(500).json({message:"Failed to fetch projects"})
     }
 
 
+})
+
+app.post('/check_email', async(req,res)=>{
+    const {email} = req.body
+    console.log(email)
+    try{
+        const is_email = await db.query("SELECT email FROM users WHERE email = $1", [email])
+
+        if (is_email.rows.length !== 0){
+            res.status(201).json(is_email.rows)
+        }else{
+            throw new Error("No email found")
+        }
+    }catch(err){
+        console.log(err)
+        res.status(500).json({message:"Failed to locate account"})
+    }
+})
+
+app.post('/reset-password', async(req,res)=>{
+    const {newPassword, email} = req.body
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    console.log(hashedPassword)
+    try{   
+        await db.query(`UPDATE users
+                        SET password_hash = $1
+                        WHERE email = $2`,
+                        [hashedPassword,email])
+        res.status(201).json({message: "password successfully updated"})             
+    }catch(err){
+        res.status(500).json({message:"Failed to change password"})
+    }
 })
 app.post('/createProject',async (req,res)=>{
     const { name,
@@ -138,7 +166,6 @@ app.post('/createProject',async (req,res)=>{
     finish_date,
     budget,
     status} = req.body
-    console.log(assigned_client)
     try{
         await db.query(`
             INSERT INTO projects(name,description,location,assigned_manager,assigned_client,start_date,finish_date,budget,status)
@@ -250,6 +277,22 @@ app.delete("/projects/:id",async(req,res)=>{
         res.status(500).json({message: `Failed to delete project because of ${err}`})
     }
     res.json({message: "Project Deleted"})
+})
+
+app.delete("/user/:id",async(req,res)=>{
+    const userId = Number(req.params.id)
+    try{
+        await db.query('DELETE FROM users WHERE id = $1',[userId])
+        res.status(201).json({message:"Successfully Deleted"})
+    }catch(err){
+        if (err.code === "23503") {
+            return res.status(409).json({
+                message: "This manager still has projects assigned. Reassign or complete their projects before deleting.",
+                });
+        }
+        console.log(err)
+        res.status(500).json({message:"Failed to delete"})
+    }
 })
 app.listen(PORT,()=>{
     console.log('Listining to PORT:'+ PORT)
