@@ -1,7 +1,9 @@
 import { useState,useEffect } from "react";
-import { UserPlus, Search, Mail, MoreVertical } from "lucide-react";
+import { Search, MoreVertical,Trash2 } from "lucide-react";
 import AddManagerModal from "@/components/AddManagerModal";
+import RowActionsMenu from "@/components/RowActionsMenu";
 import initials from "@/components/Initials";
+import { useNavigate } from "react-router-dom";
 export type Client = {
   id: string;
   full_name: string;
@@ -15,9 +17,15 @@ export default function Clients() {
   const [query, setQuery] = useState("");
   const [memberdets, setMemberdets] = useState<Client[]>([]);
   const [addManager,setAddManager] = useState(false)
+
+  // Delete confirmation
+  const [deleteTarget, setDeleteTarget] = useState<Client | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const filtered = memberdets.filter((m) =>
   m.full_name.toLowerCase().includes(query.toLowerCase())
 );
+  const navigate = useNavigate()
  async function fetchMembers() {
   try {
     const res = await fetch("http://localhost:3000/total_client");
@@ -34,6 +42,26 @@ export default function Clients() {
   }
 }
   
+
+
+  async function handleDeleteManager() {
+    if (!deleteTarget) return;
+      setIsDeleting(true);
+      setDeleteError(null);
+    try {
+      const res = await fetch(`http://localhost:3000/user/${deleteTarget.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete manager.");
+      await fetchMembers();
+      setDeleteTarget(null);
+    } catch (err) {
+      console.log(err)
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete manager.");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
   useEffect(()=>{
     fetchMembers()
   },[])
@@ -136,13 +164,11 @@ export default function Clients() {
                     </span>
                   </div>
                   <div className={`flex items-center justify-start py-4 md:justify-end ${cellBorder}`}>
-                    <button
-                      type="button"
-                      aria-label="Manager actions"
-                      className="rounded-md p-1.5 text-gray-400 hover:bg-gray-50 hover:text-[#033363]"
-                    >
-                      <MoreVertical size={18} />
-                    </button>
+                    <RowActionsMenu
+                      entityLabel="Manager"
+                      onMessage={() => navigate("/Dashboard/Messages")}
+                      onDelete={() => setDeleteTarget(manager)}
+                    />
                   </div>
                 </div>
               );
@@ -161,6 +187,54 @@ export default function Clients() {
           }}
         />
 
+
+              {/* Delete confirmation modal */}
+        {deleteTarget && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#033363]/40 p-4"
+            onClick={() => !isDeleting && setDeleteTarget(null)}
+          >
+            <div
+              className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-red-50">
+                <Trash2 size={20} className="text-red-500" />
+              </div>
+              <h3 className="mt-4 text-lg font-bold text-[#033363]">
+                Delete {deleteTarget.full_name}?
+              </h3>
+              <p className="mt-1.5 text-sm text-gray-500">
+                This will remove this manager's account. This action can't be undone.
+              </p>
+
+              {deleteError && (
+                <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+                  {deleteError}
+                </p>
+              )}
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={() => setDeleteTarget(null)}
+                  className="rounded-md px-4 py-2.5 text-sm font-medium text-[#4682B4] transition-colors hover:bg-gray-50 disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={handleDeleteManager}
+                  className="rounded-md bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
     </section>
   );
 }

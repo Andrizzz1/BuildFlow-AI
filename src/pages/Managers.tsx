@@ -50,7 +50,6 @@ export default function ManagersPage() {
     if (!deleteTarget) return;
     setIsDeleting(true);
     setDeleteError(null);
-    console.log(deleteTarget.id)
     try {
       const res = await fetch(`http://localhost:3000/user/${deleteTarget.id}`, {
         method: "DELETE",
