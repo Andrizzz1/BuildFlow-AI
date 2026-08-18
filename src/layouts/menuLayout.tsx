@@ -5,8 +5,8 @@ import StaggeredMenu from "@/components/StaggeredMenu";
 import logo from '../assets/logo.png'
 export default function MenuLayout() {
   const { user } = useAuth();
-    
-  const menuItems = [
+  console.log(user?.role)
+  const ownerItems = [
     { label: "Dashboard", ariaLabel: "Back to dashboard", link: `/Dashboard/${user?.role}` },
     { label: "Projects", ariaLabel: "Go to home page", link: "/Dashboard/Projects" },
     { label: "Managers", ariaLabel: "Learn about us", link: "/Dashboard/Managers" },
@@ -14,9 +14,26 @@ export default function MenuLayout() {
     { label: "Clients", ariaLabel: "Get in touch", link: "/Dashboard/Clients" },
     { label: "Messages", ariaLabel: "Get in touch", link: "/Dashboard/Messages" },
   ];
+  const managerItems = [
+    { label: "My Projects", ariaLabel: "Back to dashboard", link: `/Dashboard/${user?.role}` },
+    { label: "Workers", ariaLabel: "Go to home page", link: "/Dashboard/Projects" },
+    { label: "Tasks", ariaLabel: "Learn about us", link: "/Dashboard/Managers" },
+    { label: "Reports", ariaLabel: "View our services", link: "/Dashboard/Workers" },
+    { label: "Messages", ariaLabel: "Get in touch", link: "/Dashboard/Messages" },
+  ];
+  const workerItems = [
+    { label: "My Tasks", ariaLabel: "Back to dashboard", link: `/Dashboard/${user?.role}` },
+    { label: "Reports", ariaLabel: "Go to home page", link: "/Dashboard/Projects" },
+    { label: "Projects", ariaLabel: "Learn about us", link: "/Dashboard/Managers" },
+    { label: "Messages", ariaLabel: "Get in touch", link: "/Dashboard/Messages" },
+  ];
 
-  const socialItems = [{ label: "Twitter", link: "/" }];
-
+  const socialItems = [{ label: "LogOut", link: "/" }];
+  
+  const menuItems = user?.role === 'owner'? ownerItems:
+  user?.role === 'manager'? managerItems:
+  user?.role === 'worker'? workerItems:
+  [];
   return (
     <>
       <StaggeredMenu

@@ -30,10 +30,11 @@ function App (){
             <Route path="/Dashboard/Workers" element={<Workers />} />
             <Route path="/Dashboard/Messages" element={<Messages />} />
             <Route path="/Dashboard/Managers" element={<Managers />} />
-          </Route>
+         
           
-          <Route path="/Dashboard/manager" element={<Manager_Dashboard />} />
-          <Route path="/Dashboard/worker" element={<Worker_Dashboard />} />
+            <Route path="/Dashboard/manager" element={<Manager_Dashboard />} />
+            <Route path="/Dashboard/worker" element={<Worker_Dashboard />} />
+           </Route>
           <Route path="/Dashboard/client" element={<Client_Dashboard/>} />
           <Route path="/Dashboard/client-portal" element={<ClientAuthPage />} />
           <Route path="/Change-password" element={<ChangePasswordPage  />} />

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FolderPlus, Search, MoreVertical, MapPin, Pencil, Trash2 } from "lucide-react";
 import CreateProjectModal, { type ProjectDetails } from "@/components/CreateProjectModal";
-
+import toDateInputValue from "@/components/format_date";
 export type Project = {
   id: string;
   name: string;
@@ -17,7 +17,7 @@ export type Project = {
   status: "planning" | "active" | "on_hold" | "completed" | "cancelled";
 };
 
-const statusStyles: Record<Project["status"], string> = {
+export const statusStyles: Record<Project["status"], string> = {
   planning: "bg-[#4682B4]/10 text-[#4682B4]",
   active: "bg-[#FF8C00]/10 text-[#FF8C00]",
   on_hold: "bg-amber-50 text-amber-600",
@@ -25,7 +25,7 @@ const statusStyles: Record<Project["status"], string> = {
   cancelled: "bg-red-50 text-red-500",
 };
 
-const statusLabels: Record<Project["status"], string> = {
+export const statusLabels: Record<Project["status"], string> = {
   planning: "Planning",
   active: "Active",
   on_hold: "On Hold",
@@ -128,10 +128,7 @@ export default function Projects() {
   }
 
 
-  function toDateInputValue(value?: string): string {
-  if (!value) return "";
-    return value.slice(0, 10); // "2026-03-03T00:00:00.000Z" → "2026-03-03"
-  }
+
   // Map a Project (display-shaped) into the ProjectDetails shape the modal expects,
   // for prefilling the edit form. NOTE: this page's Project type stores manager/client
   // as readable names, while CreateProjectModal's ProjectDetails expects
@@ -382,13 +379,13 @@ export default function Projects() {
                 <p className="text-xs uppercase tracking-widest text-[#4682B4]/70">
                   Start Date
                 </p>
-                <p className="mt-1 text-gray-700">{selectedProject.start_date}</p>
+                <p className="mt-1 text-gray-700">{toDateInputValue(selectedProject.start_date)}</p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-widest text-[#4682B4]/70">
                   Expected Finish
                 </p>
-                <p className="mt-1 text-gray-700">{selectedProject.finish_date}</p>
+                <p className="mt-1 text-gray-700">{toDateInputValue(selectedProject.finish_date)}</p>
               </div>
             </div>
 

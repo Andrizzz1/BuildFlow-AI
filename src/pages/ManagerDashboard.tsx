@@ -1,4 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/components/AuthContext";
+import type{ Project } from "./Projects";
+import { statusStyles,statusLabels } from "./Projects";
+import toDateInputValue from "@/components/format_date";
 import {
   Search,
   MapPin,
@@ -18,113 +22,37 @@ type ProjectStatus =
   | "on_hold"
   | "completed";
 
-type Project = {
-  id: number;
-  name: string;
-  location: string;
-  client: string;
-  progress: number;
-  status: ProjectStatus;
-  startDate: string;
-  finishDate: string;
-  workers: number;
-};
 
-const projects: Project[] = [
-  {
-    id: 1,
-    name: "Skyline Corporate",
-    location: "Baguio City",
-    client: "David Rojo",
-    progress: 72,
-    status: "active",
-    startDate: "Aug 12, 2026",
-    finishDate: "Nov 30, 2026",
-    workers: 14,
-  },
-  {
-    id: 2,
-    name: "La Trinidad Warehouse",
-    location: "La Trinidad",
-    client: "ABC Logistics",
-    progress: 38,
-    status: "active",
-    startDate: "Jul 20, 2026",
-    finishDate: "Jan 18, 2027",
-    workers: 9,
-  },
-  {
-    id: 3,
-    name: "Mountain View Residence",
-    location: "Itogon",
-    client: "Maria Santos",
-    progress: 15,
-    status: "planning",
-    startDate: "Sep 5, 2026",
-    finishDate: "Apr 20, 2027",
-    workers: 5,
-  },
-  {
-    id: 4,
-    name: "Burnham Office Renovation",
-    location: "Baguio City",
-    client: "NorthPeak Inc.",
-    progress: 86,
-    status: "active",
-    startDate: "Jun 10, 2026",
-    finishDate: "Sep 15, 2026",
-    workers: 11,
-  },
-  {
-    id: 5,
-    name: "Pines Commercial Center",
-    location: "Baguio City",
-    client: "Pines Development",
-    progress: 54,
-    status: "on_hold",
-    startDate: "May 18, 2026",
-    finishDate: "Dec 12, 2026",
-    workers: 7,
-  },
-  {
-    id: 6,
-    name: "Camp 7 Residential Build",
-    location: "Camp 7",
-    client: "John Mendoza",
-    progress: 100,
-    status: "completed",
-    startDate: "Mar 2, 2026",
-    finishDate: "Jul 28, 2026",
-    workers: 8,
-  },
-];
 
-const statusStyles: Record<ProjectStatus, string> = {
-  planning: "bg-[#4682B4]/10 text-[#4682B4]",
-  active: "bg-[#FF8C00]/10 text-[#FF8C00]",
-  on_hold: "bg-amber-50 text-amber-600",
-  completed: "bg-emerald-50 text-emerald-600",
-};
 
-const statusLabels: Record<ProjectStatus, string> = {
-  planning: "Planning",
-  active: "Active",
-  on_hold: "On Hold",
-  completed: "Completed",
-};
 
-function getProgressColor(progress: number) {
-  if (progress >= 100) return "bg-emerald-500";
-  if (progress >= 70) return "bg-[#FF8C00]";
-  return "bg-[#4682B4]";
-}
+// function getProgressColor(progress: number) {
+//   if (progress >= 100) return "bg-emerald-500";
+//   if (progress >= 70) return "bg-[#FF8C00]";
+//   return "bg-[#4682B4]";
+// }
 
 export default function Manager_Dashboard() {
   const [query, setQuery] = useState("");
+  const [projects, setProjects] = useState<Project[]>([])
   const [statusFilter, setStatusFilter] = useState<"all" | ProjectStatus>(
     "all",
   );
 
+  const { user } = useAuth();
+  console.log(user?.id)
+  async function fetch_projects(){
+    console.log("entered")
+    try{
+      const res = await fetch(`http://localhost:3000/projects/manager/${user?.id}`)
+      const data = await res.json()
+      setProjects(data)
+      console.log(data)
+    }catch(err){
+      console.log(err)
+    }
+
+  }
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
       const matchesSearch =
@@ -137,7 +65,7 @@ export default function Manager_Dashboard() {
 
       return matchesSearch && matchesStatus;
     });
-  }, [query, statusFilter]);
+  }, [projects, query, statusFilter]);
 
   const totalProjects = projects.length;
   const activeProjects = projects.filter(
@@ -150,11 +78,15 @@ export default function Manager_Dashboard() {
     (project) => project.status === "on_hold",
   ).length;
 
-  const averageProgress = Math.round(
-    projects.reduce((sum, project) => sum + project.progress, 0) /
-      projects.length,
-  );
+  //FOR LATER
+  // const averageProgress = Math.round(
+  //   projects.reduce((sum, project) => sum + project.progress, 0) /
+  //     projects.length,
+  // );
 
+  useEffect(()=>{
+    fetch_projects()
+  },[])
   return (
     <section className="min-h-screen bg-[#FBFCFE] px-4 pb-16 pt-12 sm:px-6 lg:px-10 lg:pt-16">
       <div className="mx-auto max-w-7xl">
@@ -263,7 +195,8 @@ export default function Manager_Dashboard() {
             </div>
 
             <p className="mt-5 text-3xl font-bold text-[#033363]">
-              {averageProgress}%
+              {/* {averageProgress}% FOR LATER*/}
+              0
             </p>
 
             <p className="mt-1 text-sm text-gray-500">
@@ -401,7 +334,7 @@ export default function Manager_Dashboard() {
 
                       <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-600">
                         <CalendarDays size={14} className="text-[#4682B4]" />
-                        {project.finishDate}
+                        {toDateInputValue(projects[0].finish_date)}
                       </div>
                     </div>
 
@@ -412,7 +345,8 @@ export default function Manager_Dashboard() {
 
                       <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-600">
                         <Users size={14} className="text-[#4682B4]" />
-                        {project.workers}
+                        {/* {project.workers} FOR THE FUTURE*/}
+                        0
                       </div>
                     </div>
                   </div>
@@ -425,11 +359,12 @@ export default function Manager_Dashboard() {
                       </span>
 
                       <span className="text-xs font-bold text-[#033363]">
-                        {project.progress}%
+                        {/* {project.progress}% */}
+                        0
                       </span>
                     </div>
 
-                    <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+                    {/* <div className="h-2 overflow-hidden rounded-full bg-gray-100">
                       <div
                         className={`h-full rounded-full transition-all ${getProgressColor(
                           project.progress,
@@ -438,13 +373,13 @@ export default function Manager_Dashboard() {
                           width: `${project.progress}%`,
                         }}
                       />
-                    </div>
+                    </div> */}
                   </div>
 
                   {/* Footer */}
                   <div className="mt-6 flex items-center justify-between border-t border-[#033363]/5 pt-4">
                     <span className="text-xs text-gray-400">
-                      Started {project.startDate}
+                      Started {toDateInputValue(project.start_date)}
                     </span>
 
                     <span className="text-xs font-semibold text-[#4682B4] transition-colors group-hover:text-[#033363]">

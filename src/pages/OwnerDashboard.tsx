@@ -1,5 +1,3 @@
-import StaggeredMenu from "@/components/StaggeredMenu";
-import logo from "../assets/logo.png";
 import CreateProjectModal from "@/components/CreateProjectModal";
 import { useAuth } from "@/components/AuthContext";
 import type{ Project } from "./Projects";

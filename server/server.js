@@ -116,13 +116,37 @@ app.get('/projects', async(req,res)=>{
     LEFT JOIN users AS u ON u.id = p.assigned_manager
     LEFT JOIN users AS us ON us.id = p.assigned_client `)
 
-    res.status(201).json(data.rows);
+    res.status(200).json(data.rows);
     }catch(err){
         console.log(err)
         res.status(500).json({message:"Failed to fetch projects"})
     }
+})
 
+app.get('/projects/manager/:id', async(req,res)=>{
+    const userId = req.params.id
+    try{
+        const managerProjects = await db.query(`
+            SELECT p.id,
+                p.name,
+                p.description,
+                p.location,
+                u.full_name AS client_name,
+                p.start_date,
+                p.finish_date,
+                p.status,
+                p.budget,
+                p.created_at
+        FROM projects AS p
+        LEFT JOIN users AS u ON u.id = p.assigned_client
+        WHERE p.assigned_manager = $1
 
+            `,[userId])
+        console.log(managerProjects.rows)
+        res.status(200).json(managerProjects.rows)
+    }catch(err){
+        console.log(err)
+    }
 })
 
 app.post('/check_email', async(req,res)=>{
