@@ -4,12 +4,8 @@ import initials from "@/components/Initials";
 import AddWorkerModal from "@/components/AddWorkerModal";
 import RowActionsMenu from "@/components/RowActionsMenu";
 import { useNavigate } from "react-router-dom";
-export type Worker = {
-  id: string;
-  full_name: string;
-  email: string;
-  project_count: string;
-};
+import { Fetch_workers } from "@/hooks/FetchWorkers";
+import type{ Worker } from "@/types/types";
 
 
 export default function Worker_Dashboard(){
@@ -25,21 +21,7 @@ export default function Worker_Dashboard(){
         m.full_name.toLowerCase().includes(query.toLowerCase())
     );
     const navigate = useNavigate()
-    async function Fetch_workers(){
-        try{
-            const res = await fetch('http://localhost:3000/total_worker')
-            const data = await res.json();
-            console.log(data)
 
-            if (!Array.isArray(data)) {
-                console.error("Expected an array, got:", data);
-            return; // don't set bad data into state
-            }
-            setMemberdets(data);
-        }catch(err){
-            console.error("Failed to fetch members:", err);
-        }
-    }
 
       async function handleDeleteManager() {
         if (!deleteTarget) return;
@@ -50,7 +32,7 @@ export default function Worker_Dashboard(){
             method: "DELETE",
           });
           if (!res.ok) throw new Error("Failed to delete manager.");
-          await Fetch_workers();
+          await Fetch_workers(setMemberdets);
           setDeleteTarget(null);
         } catch (err) {
           console.log(err)
@@ -61,7 +43,8 @@ export default function Worker_Dashboard(){
       }
 
     useEffect(()=>{
-        Fetch_workers();
+        Fetch_workers(setMemberdets);
+        
     },[])
     
       return (
@@ -172,7 +155,7 @@ export default function Worker_Dashboard(){
             isOpen={addWorker}
             onClose={()=>{setAddWorker(false)}}
             onSubmit={()=>{
-                Fetch_workers();
+                Fetch_workers(setMemberdets);
             }}
         />
 

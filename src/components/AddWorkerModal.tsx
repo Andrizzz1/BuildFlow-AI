@@ -3,7 +3,8 @@ import { X, Mail } from "lucide-react";
 import { AddWorker } from "@/hooks/AddWorker";
 export type WorkerDetails = {
     name:string,
-    email:string
+    email:string,
+    specialty:string
 };
 
 type AddWorkerModalProps = {
@@ -15,7 +16,7 @@ type AddWorkerModalProps = {
 const initialForm = {
   name: "",
   email: "",
-
+  specialty:""
 };
 
 export default function AddWorkerModal({
@@ -89,25 +90,47 @@ export default function AddWorkerModal({
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-6 py-6">
           <div className="grid grid-cols-1 gap-5 ">
-            {/* Project name */}
-            <div className="md:col-span-2">
-              <label
-                htmlFor="name"
-                className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
-              >
-                Name
-              </label>
-              <div className="flex items-center gap-2 rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/30">
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Juan Dela Cruz"
-                  className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
-                />
+            {/* name */}
+            <div className="md:col-span-2 grid grid-cols-2 gap-1">
+              <div>
+                <label
+                  htmlFor="name"
+                  className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
+                >
+                  Name
+                </label>
+                <div className="flex items-center gap-2 rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/30">
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    required
+                    value={form.name}
+                    onChange={handleChange}
+                    placeholder="Juan Dela Cruz"
+                    className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
+                  />
+                </div> 
+              </div>
+              <div>
+                <label
+                  htmlFor="specialty"
+                  className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
+                >
+                  Specialty
+                </label>
+                <div className="flex items-center gap-2 rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/30">
+                  <input
+                    id="specialty"
+                    name="specialty"
+                    type="text"
+                    required
+                    value={form.specialty}
+                    onChange={handleChange}
+                    placeholder="Juan Dela Cruz"
+                    className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
+                  />
+                </div> 
               </div>
             </div>
 

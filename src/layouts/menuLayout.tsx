@@ -16,7 +16,7 @@ export default function MenuLayout() {
   ];
   const managerItems = [
     { label: "My Projects", ariaLabel: "Back to dashboard", link: `/Dashboard/${user?.role}` },
-    { label: "Workers", ariaLabel: "Go to home page", link: "/Dashboard/Projects" },
+    { label: "Workers", ariaLabel: "Go to home page", link: "/Dashboard/manager/workers" },
     { label: "Tasks", ariaLabel: "Learn about us", link: "/Dashboard/Managers" },
     { label: "Reports", ariaLabel: "View our services", link: "/Dashboard/Workers" },
     { label: "Messages", ariaLabel: "Get in touch", link: "/Dashboard/Messages" },
