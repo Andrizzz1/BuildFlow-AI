@@ -8,6 +8,7 @@ import {
   X,
   Check,
   ChevronDown,
+  UserPlus
 } from "lucide-react";
 import { Fetch_workers } from "@/hooks/FetchWorkers";
 import AddWorkerModal from "@/components/AddWorkerModal";
@@ -129,7 +130,7 @@ export default function ManagerWorkers() {
                 onClick={() => setAddWorker(true)}
                 className="flex items-center justify-center gap-2 rounded-xl bg-[#FF8C00] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_25px_-8px_rgba(255,140,0,0.5)] transition hover:bg-[#e67e00] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#033363]"
             >
-                <Plus size={18} />
+                <UserPlus size={18} />
                 Add Workers
             </button>
             </div>
@@ -337,7 +338,7 @@ export default function ManagerWorkers() {
                       statusStyles[worker.status]
                     }`}
                   >
-                    {worker.status}
+                    {worker.status? worker.status:"Available"}
                   </span>
                 </div>
 

@@ -70,14 +70,14 @@ app.get('/total_manager',async (req,res)=>{
 
 app.get('/total_worker',async (req,res)=>{
     const get =  await db.query(
-    `SELECT u.email,
-	    u.full_name,
-	    u.id,
-        COUNT(p.id) AS project_count
+    `SELECT 	wp.specialty,
+		wp.project,
+		wp.status,
+		u.email,
+		u.full_name
         FROM users AS u
-        LEFT JOIN projects AS p ON p.assigned_manager = u.id
-        WHERE u.role = 'worker'
-        GROUP BY u.id, u.full_name, u.email;`
+        LEFT JOIN worker_profiles AS wp ON wp.id = u.id
+        WHERE u.role = 'worker'`
 	   )
        res.status(200).json(get.rows);
 })
@@ -223,23 +223,39 @@ app.post('/addManager',async (req,res)=>{
 
 })
 
-app.post('/addWorker',async(req,res)=>{
-    const {email, name} =  req.body
-    // const saltRounds = 10; // how much computational work the hash requires — 10 is a common default
+app.post('/addWorker', async (req, res) => {
+  const { email, name, specialty, hire_date, phone_number, emergency_contact } = req.body;
+
+  try {
     const hashedPassword = await bcrypt.hash('1', saltRounds);
-    const user = await db.query("SELECT email, role FROM users WHERE email = $1 AND role =$2",[email,'worker'])
-    if(user.rows.length != 0){
-        throw new Error("Email already exist")
+
+    const existing = await db.query(
+      "SELECT email FROM users WHERE email = $1 AND role = $2",
+      [email, 'worker']
+    );
+    if (existing.rows.length !== 0) {
+      return res.status(409).json({ message: "Email already exists" });
     }
 
-    try{
-        await db.query("INSERT INTO users(email,password_hash,full_name,role) VALUES($1,$2,$3,$4)",[email,hashedPassword,name,'worker'])
-        res.status(201).json({ message: "Worker added" });
-    }catch(err){
-        console.log(err)
-        res.status(500).json({ message: "Failed to add worker" });
-    }
-})
+    // Insert into users first, and get back the new user's id
+    const newUser = await db.query(
+      "INSERT INTO users(email, password_hash, full_name, role) VALUES($1,$2,$3,$4) RETURNING id",
+      [email, hashedPassword, name, 'worker']
+    );
+    const newUserId = newUser.rows[0].id;
+
+    // Now insert the worker-specific details, using that same id
+    await db.query(
+      "INSERT INTO worker_profiles(id, specialty,status, phone_number, emergency_contact, hire_date) VALUES($1,$2,$3,$4,$5,$6)",
+      [newUserId, specialty, 'Available',phone_number, emergency_contact, hire_date]
+    );
+
+    res.status(201).json({ message: "Worker added" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Failed to add worker" });
+  }
+});
 
 app.post('/registerClient',async(req,res)=>{
     const {full_name,email,password} = req.body

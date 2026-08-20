@@ -1,10 +1,22 @@
 import { useState } from "react";
-import { X, Mail } from "lucide-react";
+import {
+  X,
+  Mail,
+  Calendar,
+  User,
+  BriefcaseBusiness,
+  Phone,
+  ShieldAlert,
+} from "lucide-react";
 import { AddWorker } from "@/hooks/AddWorker";
+
 export type WorkerDetails = {
-    name:string,
-    email:string,
-    specialty:string
+  name: string;
+  email: string;
+  specialty: string;
+  hire_date: string;
+  phone_number: string;
+  emergency_contact: string;
 };
 
 type AddWorkerModalProps = {
@@ -13,29 +25,37 @@ type AddWorkerModalProps = {
   onSubmit: (details: WorkerDetails) => Promise<void> | void;
 };
 
-const initialForm = {
+const initialForm: WorkerDetails = {
   name: "",
   email: "",
-  specialty:""
+  specialty: "",
+  hire_date: "",
+  phone_number: "",
+  emergency_contact: "",
 };
 
 export default function AddWorkerModal({
   isOpen,
   onClose,
-  onSubmit
+  onSubmit,
 }: AddWorkerModalProps) {
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState<WorkerDetails>(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  
   if (!isOpen) return null;
 
   function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -43,17 +63,33 @@ export default function AddWorkerModal({
     setError(null);
 
     setIsSubmitting(true);
+    console.log(form)
     try {
       await AddWorker(form);
+
+      await onSubmit(form);
+
       setForm(initialForm);
-      await onSubmit(form); 
       onClose();
     } catch (err) {
-      console.log(err)
-      setError(err instanceof Error ? err.message : "Failed to Add Worker.");
+      console.error(err);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to add worker.",
+      );
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function handleClose() {
+    if (isSubmitting) return;
+
+    setForm(initialForm);
+    setError(null);
+    onClose();
   }
 
   return (
@@ -61,124 +97,247 @@ export default function AddWorkerModal({
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-[#033363]/40 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={handleClose}
         aria-hidden="true"
       />
 
       {/* Modal */}
-      <div className="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-[0_25px_70px_-15px_rgba(3,51,99,0.4)]">
+      <div
+        className="relative z-10 w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-[0_25px_70px_-15px_rgba(3,51,99,0.4)]"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#033363]/10 px-6 py-5">
+        <div className="flex items-center justify-between border-b border-[#033363]/10 px-6 py-5 sm:px-7">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#4682B4]">
-              New Worker
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#4682B4]">
+              Team Management
             </p>
-            <h2 className="mt-0.5 text-xl font-bold text-[#033363]">
+
+            <h2 className="mt-1 text-xl font-bold text-[#033363] sm:text-2xl">
               Add Worker
             </h2>
+
+            <p className="mt-1 text-sm text-gray-500">
+              Create a worker profile and add them to your organization.
+            </p>
           </div>
+
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
+            disabled={isSubmitting}
             aria-label="Close"
-            className="rounded-md p-2 text-gray-400 transition-colors hover:bg-gray-50 hover:text-[#033363]"
+            className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-50 hover:text-[#033363] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-6">
-          <div className="grid grid-cols-1 gap-5 ">
-            {/* name */}
-            <div className="md:col-span-2 grid grid-cols-2 gap-1">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
-                >
-                  Name
-                </label>
-                <div className="flex items-center gap-2 rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/30">
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    required
-                    value={form.name}
-                    onChange={handleChange}
-                    placeholder="Juan Dela Cruz"
-                    className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
-                  />
-                </div> 
-              </div>
-              <div>
-                <label
-                  htmlFor="specialty"
-                  className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
-                >
-                  Specialty
-                </label>
-                <div className="flex items-center gap-2 rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/30">
-                  <input
-                    id="specialty"
-                    name="specialty"
-                    type="text"
-                    required
-                    value={form.specialty}
-                    onChange={handleChange}
-                    placeholder="Juan Dela Cruz"
-                    className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
-                  />
-                </div> 
-              </div>
-            </div>
-
-            {/* Email*/}
-            <div >
+        <form onSubmit={handleSubmit} className="px-6 py-6 sm:px-7">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {/* Full Name */}
+            <div>
               <label
-                htmlFor="email"
-                className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
+                htmlFor="name"
+                className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
               >
-                Email
+                Full Name
               </label>
-              <div className="flex items-center gap-2 rounded-md border border-[#033363]/20 bg-white px-3 py-2.5 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/30">
-                <Mail size={18} className="shrink-0 text-[#4682B4]" />
+
+              <div className="flex items-center gap-2 rounded-xl border border-[#033363]/15 bg-white px-3 py-3 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/20">
+                <User
+                  size={18}
+                  className="shrink-0 text-[#4682B4]"
+                />
+
                 <input
-                  id="email"
-                  name="email"
+                  id="name"
+                  name="name"
                   type="text"
                   required
-                  value={form.email}
+                  value={form.name}
                   onChange={handleChange}
-                  placeholder="Enter an email"
+                  placeholder="Juan Dela Cruz"
                   className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
                 />
               </div>
             </div>
+
+            {/* Specialty */}
+            <div>
+              <label
+                htmlFor="specialty"
+                className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
+              >
+                Specialty
+              </label>
+
+              <div className="flex items-center gap-2 rounded-xl border border-[#033363]/15 bg-white px-3 py-3 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/20">
+                <BriefcaseBusiness
+                  size={18}
+                  className="shrink-0 text-[#4682B4]"
+                />
+
+                <input
+                  id="specialty"
+                  name="specialty"
+                  type="text"
+                  required
+                  value={form.specialty}
+                  onChange={handleChange}
+                  placeholder="Electrician"
+                  className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
+                />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <label
+                htmlFor="email"
+                className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
+              >
+                Email Address
+              </label>
+
+              <div className="flex items-center gap-2 rounded-xl border border-[#033363]/15 bg-white px-3 py-3 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/20">
+                <Mail
+                  size={18}
+                  className="shrink-0 text-[#4682B4]"
+                />
+
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="juan@buildflow.com"
+                  className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
+                />
+              </div>
+            </div>
+
+            {/* Phone Number */}
+            <div>
+              <label
+                htmlFor="phone_number"
+                className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
+              >
+                Phone Number
+              </label>
+
+              <div className="flex items-center gap-2 rounded-xl border border-[#033363]/15 bg-white px-3 py-3 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/20">
+                <Phone
+                  size={18}
+                  className="shrink-0 text-[#4682B4]"
+                />
+
+                <input
+                  id="phone_number"
+                  name="phone_number"
+                  type="tel"
+                  required
+                  value={form.phone_number}
+                  onChange={handleChange}
+                  placeholder="09195371354"
+                  className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
+                />
+              </div>
+            </div>
+
+            {/* Hire Date */}
+            <div>
+              <label
+                htmlFor="hire_date"
+                className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
+              >
+                Hire Date
+              </label>
+
+              <div className="flex items-center gap-2 rounded-xl border border-[#033363]/15 bg-white px-3 py-3 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/20">
+                <Calendar
+                  size={18}
+                  className="shrink-0 text-[#4682B4]"
+                />
+
+                <input
+                  id="hire_date"
+                  name="hire_date"
+                  type="date"
+                  required
+                  value={form.hire_date}
+                  onChange={handleChange}
+                  className="w-full bg-transparent text-sm text-[#033363] outline-none"
+                />
+              </div>
+
+              <p className="mt-1.5 text-[10px] text-gray-400">
+                Date the worker officially joined the organization.
+              </p>
+            </div>
+
+            {/* Emergency Contact */}
+            <div className="sm:col-span-2">
+              <label
+                htmlFor="emergency_contact"
+                className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.15em] text-[#033363]"
+              >
+                Emergency Contact
+              </label>
+
+              <div className="flex items-center gap-2 rounded-xl border border-[#033363]/15 bg-white px-3 py-3 transition-colors focus-within:border-[#00BFFF] focus-within:ring-2 focus-within:ring-[#00BFFF]/20">
+                <ShieldAlert
+                  size={18}
+                  className="shrink-0 text-[#4682B4]"
+                />
+
+                <input
+                  id="emergency_contact"
+                  name="emergency_contact"
+                  type="text"
+                  required
+                  value={form.emergency_contact}
+                  onChange={handleChange}
+                  placeholder="Maria Dela Cruz — +1 (555) 908-2214"
+                  className="w-full bg-transparent text-sm text-[#033363] outline-none placeholder:text-[#4682B4]/40"
+                />
+              </div>
+
+              <p className="mt-1.5 text-[10px] text-gray-400">
+                Name and phone number of who to contact in case of an emergency.
+              </p>
+            </div>
           </div>
 
+          {/* Error */}
           {error && (
-            <p className="mt-5 rounded-md bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
-              {error}
-            </p>
+            <div className="mt-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3">
+              <p className="text-xs font-medium text-red-700">
+                {error}
+              </p>
+            </div>
           )}
 
           {/* Actions */}
-          <div className="mt-6 flex items-center justify-end gap-3 border-t border-[#033363]/10 pt-5">
+          <div className="mt-7 flex flex-col-reverse gap-3 border-t border-[#033363]/10 pt-5 sm:flex-row sm:justify-end">
             <button
               type="button"
-              onClick={onClose}
-              className="rounded-md px-4 py-2.5 text-sm font-medium text-[#4682B4] transition-colors hover:bg-gray-50"
+              onClick={handleClose}
+              disabled={isSubmitting}
+              className="rounded-xl px-5 py-3 text-sm font-medium text-[#4682B4] transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
+
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-md bg-[#FF8C00] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#e67e00] disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-[#FF8C00] px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_20px_-8px_rgba(255,140,0,0.5)] transition-colors hover:bg-[#e67e00] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmitting ? "Adding..." : "Add"}
+              {isSubmitting ? "Adding Worker..." : "Add Worker"}
             </button>
           </div>
         </form>
